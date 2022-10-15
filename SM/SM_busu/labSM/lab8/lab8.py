@@ -1,0 +1,3 @@
+
+
+def mesi(actions)

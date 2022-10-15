@@ -1,0 +1,14 @@
+{
+    "editor.semanticTokenColorCustomizations": {
+        "rules": {
+            "*.deprecated": {
+                "foreground": "#808080",
+                "italic": true
+            }
+        }
+    },
+    "files.associations": {
+        "matrix.h": "c",
+        "stdio.h": "c"
+    }
+}

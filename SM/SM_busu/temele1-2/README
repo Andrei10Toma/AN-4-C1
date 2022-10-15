@@ -1,0 +1,32 @@
+Parallel subset generation - Tema 1,2 SM
+Busuioc Gabriel-Razvan 344C1
+
+Algoritmul de baza:
+
+Algoritmul primeste la input un numar N, care reprezinta lungimea setului pe
+baza caruia se doreste generarea subseturilor(e.g. N = 3 -> Set = {1, 2, 3}).
+Algoritmul se foloseste de reprezentarea in binar a tuturor numerelor ce
+apartin intervalului [0, 2^N], bitii de 1 dintr-un numar sugerand ca numarul
+corespunzator bitului se afla in subset (e.g. 3==b011 corespunde subsetului
+{1, 2}, 4==b100 corespunde subsetului {3}).
+
+Toate variantele paralele ale algoritmului sparg intervalul [0, 2^N] in bucati
+care sunt ulterior impartite fiecarui thread sau fiecarui proces.
+
+In cazul variantelor ce folosesc MPI, Masterul comunica fiecarui proces slave
+intervalul aferent, urmand ca apoi sa primeasca de la fiecare proces slave
+subseturile calculate.
+
+Rulare:
+tema1:
+-make
+-mpirun -np NO_PROCS mpi_subset_generation N
+-./openmp_subset_generation N NO_THREADS
+-make clean
+
+tema2:
+-make
+-mpirun -np NO_PROCS mpi_openmp_subset_generation N NO_THREADS
+-mpirun -np NO_PROCS mpi_pthreads_subset_generation N NO_THREADS
+-./pthreads_subset_generation N NO_THREADS
+-make clean

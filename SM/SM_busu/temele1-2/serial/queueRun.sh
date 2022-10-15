@@ -1,0 +1,1 @@
+time ./serial 22

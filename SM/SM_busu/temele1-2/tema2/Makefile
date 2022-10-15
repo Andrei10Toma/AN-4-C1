@@ -1,0 +1,13 @@
+all: pthreads_subset_generation mpi_pthreads_subset_generation mpi_openmp_subset_generation
+
+pthreads_subset_generation: pthreads_subset_generation.c
+	gcc -pthread pthreads_subset_generation.c -o pthreads_subset_generation -lm
+
+mpi_pthreads_subset_generation: mpi_pthreads_subset_generation.c
+	mpicc mpi_pthreads_subset_generation.c -o mpi_pthreads_subset_generation -lm
+
+mpi_openmp_subset_generation: mpi_openmp_subset_generation.c
+	mpicc -fopenmp mpi_openmp_subset_generation.c -o mpi_openmp_subset_generation -lm
+
+clean:
+	rm pthreads_subset_generation mpi_pthreads_subset_generation mpi_openmp_subset_generation
