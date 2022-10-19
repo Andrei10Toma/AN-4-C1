@@ -5,33 +5,37 @@ class Main inherits IO{
     read_list: Bool <- true;
     somestr : String;
     list: List;
+    a2i: A2I <- new A2I;
 
     main():Object {
         {
             while looping loop {
                 let
-                    token: String
+                    type: String
                 in
                 if read_list then {
                     list <- new List;
                     somestr <- in_string();
-                    -- out_string(somestr).out_string("\n");
                     tokenizer.init(somestr, " ");
-                    token <- tokenizer.next();
-                    if token = "Soda" then {
-                        list.add(new Soda.init(token, tokenizer.next(), 10));
-                        case list.elem() of
-                            x : Soda => out_string(x.toString()).out_string("\n");
-                        esac;
-                    }
+                    type <- tokenizer.next();
+                    if type = "Soda" then
+                        list.add(new Soda.init(tokenizer.next(), tokenizer.next(), a2i.a2i(tokenizer.next())))
                     else
-                        ""
+                        if type = "Coffee" then
+                            list.add(new Coffee.init(tokenizer.next(), tokenizer.next(), a2i.a2i(tokenizer.next())))
+                        else
+                            if type = "Laptop" then
+                                list.add(new Laptop.init(tokenizer.next(), tokenizer.next(), a2i.a2i(tokenizer.next())))
+                            else
+                                if type = "Router" then
+                                    list.add(new Router.init(tokenizer.next(), tokenizer.next(), a2i.a2i(tokenizer.next())))
+                                else
+                                    ""
+                                fi
+                            fi
+                        fi
                     fi;
-                    -- if isVoid lists.next() then
-                        -- out_string("niceeeee").out_string("\n")
-                    -- else
-                        -- out_string("not niceeee").out_string("\n")
-                    -- fi;
+                    
                 }
                 else {
                     somestr <- in_string();
