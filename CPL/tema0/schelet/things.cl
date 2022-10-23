@@ -16,7 +16,7 @@ class Product {
     getprice():Int{ price * 119 / 100 };
 
     toString():String {
-        name.concat(" ").concat(model)
+        type_name().concat("(").concat(name).concat(",").concat(model).concat(")")
     };
 };
 
@@ -48,13 +48,15 @@ class Router inherits Product {};
 class Rank {
     name : String;
 
-    init(n : String):String {
-        name <- n
+    init(n : String):SELF_TYPE {
+        {
+            name <- n;
+            self;
+        }
     };
 
     toString():String {
-        -- Hint: what are the default methods of Object?
-        "TODO: implement me"
+        type_name().concat("(").concat(name).concat(")")
     };
 };
 

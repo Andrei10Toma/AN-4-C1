@@ -1,11 +1,20 @@
-Soda ConstPriceCola 0.33L 200
-Coffee StarDollars petite 1500
-Laptop SNSV AX23K 500000
-Soda NukaCola 0.5L 300
-Router ChinkTik 2CIP4U 6500
-Laptop NoNoVo SleepPad 32000
-Coffe DenKaffe 500g 1200
-Router SNSV TS44u 42300
-Corporal John
-Sergent Mike
+Soda a 1 100
+Private i
+Soda a 2 200
+Private j
+Soda a 3 300
+Private k
+Soda a 4 400
+Private l
+Coffee b 1 100
+Officer i
+Coffee b 2 200
+Officer j
+Coffee b 3 300
+Officer k
+Coffee b 4 400
+Officer l
+String whatever
 END
+filterBy 1 ProductFilter
+print 1

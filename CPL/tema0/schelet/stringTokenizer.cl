@@ -19,25 +19,30 @@ class StringTokenizer {
             tmp_index: Int <- index
         in
         {
-            while looping loop
-            {
-                current_character <- string.substr(index, 1);
-                if current_character = delimiter then {
-                    looping <- false;
-                    index <- index + 1;
-                }
-                else
-                    if string.length() = index + 1 then {
+            if string.length() <= index then
+                ""
+            else {
+                while looping loop
+                {
+                    current_character <- string.substr(index, 1);
+                    if current_character = delimiter then {
                         looping <- false;
-                        index <- index + 2;
+                        index <- index + 1;
                     }
                     else
-                        index <- index + 1
-                    fi
-                fi;
-            } pool;
+                        if string.length() = index + 1 then {
+                            looping <- false;
+                            index <- index + 2;
+                        }
+                        else
+                            index <- index + 1
+                        fi
+                    fi;
+                } pool;
 
-            string.substr(tmp_index, index - tmp_index - 1);
+                string.substr(tmp_index, index - tmp_index - 1);
+            }
+            fi;
         }
     };
 };

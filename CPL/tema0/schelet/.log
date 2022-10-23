@@ -1,1 +1,1 @@
-ERROR: 0: Exception: String.substr out of range
+ERROR: 203: Type-Check: cannot assign to self

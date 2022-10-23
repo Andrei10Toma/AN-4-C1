@@ -140,13 +140,6 @@ numbers are handled correctly.
         }
     };
 
-    setNext(n: List): SELF_TYPE {
-        {
-            next <- n;
-            self;
-        }
-    };
-
     toString(index: Int):String {
         case elem of
             l: List => if not isVoid next then new A2I.i2a(index + 1).concat(": [ ").concat(l.toString(index)).concat(" ]\n").concat(next.toString(index + 1)) else new A2I.i2a(index + 1).concat(": [ ").concat(l.toString(index)).concat(" ]\n") fi;
@@ -182,29 +175,8 @@ numbers are handled correctly.
         }
     };
 
-    filterBy(f: Filter): SELF_TYPE {
-        {
-            let
-                iterator_1: List <- self,
-                iterator_2: List
-            in {
-                while not isVoid self loop
-                    -- if f.filter(iterator_1.elem()) then
-                    --     self
-                    -- else
-                    --     if not isVoid iterator_2
-                    --         iterator_2.setNext(next)
-                    --     else
-                    --         self <- next
-                    --     fi
-                    -- fi;
-                    -- iterator_2 <- iterator_1;
-                    -- iterator_1 <- iterator_1.next();
-                    self <- next
-                pool;
-            };
-            self;
-        }
+    filterBy():SELF_TYPE {
+        self (* TODO *)
     };
 
     sortBy():SELF_TYPE {
@@ -233,7 +205,7 @@ numbers are handled correctly.
             while looping loop {
                 let
                     type: String,
-                    aux_string: String,
+                    print_index_string: String,
                     print_index_int: Int,
                     index_1: Int,
                     index_2: Int,
@@ -302,11 +274,11 @@ numbers are handled correctly.
                         }
                         else
                             if type = "print" then {
-                                aux_string <- tokenizer.next();
-                                if aux_string = "" then
+                                print_index_string <- tokenizer.next();
+                                if print_index_string = "" then
                                     out_string(lists.toString(0))
                                 else {
-                                    print_index_int <- a2i.a2i(aux_string);
+                                    print_index_int <- a2i.a2i(print_index_string);
                                     case lists.get(print_index_int - 1) of
                                         x: List => out_string("[ ").out_string(x.toString(0)).out_string(" ]").out_string("\n");
                                     esac;
@@ -326,18 +298,7 @@ numbers are handled correctly.
                                         lists.remove_merged(index_2 - 2);
                                     }
                                     else
-                                        if type = "filterBy" then {
-                                            index_1 <- a2i.a2i(tokenizer.next());
-                                            aux_string <- tokenizer.next();
-                                            if aux_string = "ProductFilter" then
-                                                cast_object_to_list(lists.get(index_1 - 1)).filterBy(new ProductFilter)
-                                            else
-                                                abort()
-                                            fi;
-                                        }
-                                        else
-                                            abort()
-                                        fi
+                                        abort()
                                     fi
                                 fi
                             fi
@@ -472,21 +433,3 @@ class Filter {
 };
 
 (* TODO: implement specified comparators and filters*)
-
-class ProductFilter inherits Filter {
-    filter(o : Object): Bool {
-        case o of
-            x: Product => true;
-            y: Object => false;
-        esac
-    };
-};
-
-class RankFilter inherits Filter {
-    filter(o : Object): Bool {
-        case o of
-            x: Rank => true;
-            y: Object => false;
-        esac
-    };
-};

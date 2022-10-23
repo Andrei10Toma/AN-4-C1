@@ -8,3 +8,21 @@ class Filter {
 };
 
 (* TODO: implement specified comparators and filters*)
+
+class ProductFilter inherits Filter {
+    filter(o : Object): Bool {
+        case o of
+            x: Product => true;
+            y: Object => false;
+        esac
+    };
+};
+
+class RankFilter inherits Filter {
+    filter(o : Object): Bool {
+        case o of
+            x: Rank => true;
+            y: Object => false;
+        esac
+    };
+};
