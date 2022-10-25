@@ -140,16 +140,27 @@ numbers are handled correctly.
         }
     };
 
+    setNext(n: List): SELF_TYPE {
+        {
+            next <- n;
+            self;
+        }
+    };
+
     toString(index: Int):String {
-        case elem of
-            l: List => if not isVoid next then new A2I.i2a(index + 1).concat(": [ ").concat(l.toString(index)).concat(" ]\n").concat(next.toString(index + 1)) else new A2I.i2a(index + 1).concat(": [ ").concat(l.toString(index)).concat(" ]\n") fi;
-            p: Product => if not isVoid next then p.toString().concat(", ").concat(next.toString(index)) else p.toString() fi;
-            r: Rank => if not isVoid next then r.toString().concat(", ").concat(next.toString(index)) else r.toString() fi;
-            s: String => if not isVoid next then s.type_name().concat("(").concat(s).concat(")").concat(", ").concat(next.toString(index)) else s.type_name().concat("(").concat(s).concat(")") fi;
-            i: Int => if not isVoid next then i.type_name().concat("(").concat(new A2I.i2a(i)).concat(")").concat(", ").concat(next.toString(index)) else i.type_name().concat("(").concat(new A2I.i2a(i)).concat(")") fi;
-            b: Bool => if not isVoid next then b.type_name().concat("(").concat(if b = true then "true" else "false" fi).concat(")").concat(", ").concat(next.toString(index)) else b.type_name().concat("(").concat(if b = true then "true" else "false" fi).concat(")") fi;
-            io: IO => if not isVoid next then io.type_name().concat("(").concat(")").concat(next.toString(index)) else io.type_name().concat("(").concat(")") fi;
-        esac
+        if isVoid elem then
+            ""
+        else
+            case elem of
+                l: List => if not isVoid next then new A2I.i2a(index + 1).concat(": [ ").concat(l.toString(index)).concat(" ]\n").concat(next.toString(index + 1)) else new A2I.i2a(index + 1).concat(": [ ").concat(l.toString(index)).concat(" ]\n") fi;
+                p: Product => if not isVoid next then p.toString().concat(", ").concat(next.toString(index)) else p.toString() fi;
+                r: Rank => if not isVoid next then r.toString().concat(", ").concat(next.toString(index)) else r.toString() fi;
+                s: String => if not isVoid next then s.type_name().concat("(").concat(s).concat(")").concat(", ").concat(next.toString(index)) else s.type_name().concat("(").concat(s).concat(")") fi;
+                i: Int => if not isVoid next then i.type_name().concat("(").concat(new A2I.i2a(i)).concat(")").concat(", ").concat(next.toString(index)) else i.type_name().concat("(").concat(new A2I.i2a(i)).concat(")") fi;
+                b: Bool => if not isVoid next then b.type_name().concat("(").concat(if b = true then "true" else "false" fi).concat(")").concat(", ").concat(next.toString(index)) else b.type_name().concat("(").concat(if b = true then "true" else "false" fi).concat(")") fi;
+                io: IO => if not isVoid next then io.type_name().concat("(").concat(")").concat(next.toString(index)) else io.type_name().concat("(").concat(")") fi;
+            esac
+        fi
     };
 
     merge(other : List): SELF_TYPE {
@@ -175,8 +186,34 @@ numbers are handled correctly.
         }
     };
 
-    filterBy():SELF_TYPE {
-        self (* TODO *)
+    setElemAtIndex(el: Object, index: Int): SELF_TYPE {
+        {
+            if index = 0 then
+                setElem(el)
+            else
+                next.setElemAtIndex(el, index - 1)
+            fi;
+            self;
+        }
+    };
+
+    filterBy(f: Filter): List {
+        let
+            iterator: List <- self,
+            result: List <- new List
+        in 
+        {
+            while not isVoid iterator loop {
+                if f.filter(iterator.elem()) then {
+                    result.add(iterator.elem());
+                    iterator <- iterator.next();
+                }
+                else
+                    iterator <- iterator.next()
+                fi;
+            } pool;
+            result;
+        }
     };
 
     sortBy():SELF_TYPE {
@@ -205,7 +242,7 @@ numbers are handled correctly.
             while looping loop {
                 let
                     type: String,
-                    print_index_string: String,
+                    aux_string: String,
                     print_index_int: Int,
                     index_1: Int,
                     index_2: Int,
@@ -274,11 +311,11 @@ numbers are handled correctly.
                         }
                         else
                             if type = "print" then {
-                                print_index_string <- tokenizer.next();
-                                if print_index_string = "" then
+                                aux_string <- tokenizer.next();
+                                if aux_string = "" then
                                     out_string(lists.toString(0))
                                 else {
-                                    print_index_int <- a2i.a2i(print_index_string);
+                                    print_index_int <- a2i.a2i(aux_string);
                                     case lists.get(print_index_int - 1) of
                                         x: List => out_string("[ ").out_string(x.toString(0)).out_string(" ]").out_string("\n");
                                     esac;
@@ -298,7 +335,26 @@ numbers are handled correctly.
                                         lists.remove_merged(index_2 - 2);
                                     }
                                     else
-                                        abort()
+                                        if type = "filterBy" then {
+                                            index_1 <- a2i.a2i(tokenizer.next());
+                                            aux_string <- tokenizer.next();
+                                            if aux_string = "ProductFilter" then
+                                                lists.setElemAtIndex(cast_object_to_list(lists.get(index_1 - 1)).filterBy(new ProductFilter), index_1 - 1)
+                                            else
+                                                if aux_string = "RankFilter" then
+                                                    lists.setElemAtIndex(cast_object_to_list(lists.get(index_1 - 1)).filterBy(new RankFilter), index_1 - 1)
+                                                else
+                                                    if aux_string = "SamePriceFilter" then
+                                                        lists.setElemAtIndex(cast_object_to_list(lists.get(index_1 - 1)).filterBy(new SamePriceFilter), index_1 - 1)
+                                                    else
+                                                        abort()
+                                                    fi
+                                                fi
+                                            fi;
+                                        }
+                                        else
+                                            abort()
+                                        fi
                                     fi
                                 fi
                             fi
@@ -433,3 +489,30 @@ class Filter {
 };
 
 (* TODO: implement specified comparators and filters*)
+
+class ProductFilter inherits Filter {
+    filter(o : Object): Bool {
+        case o of
+            x: Product => true;
+            y: Object => false;
+        esac
+    };
+};
+
+class RankFilter inherits Filter {
+    filter(o : Object): Bool {
+        case o of
+            x: Rank => true;
+            y: Object => false;
+        esac
+    };
+};
+
+class SamePriceFilter inherits Filter {
+    filter(o : Object): Bool {
+        case o of
+            x: Product => x@Product.getprice() = x.getprice();
+            y: Object => false;
+        esac
+    };
+};

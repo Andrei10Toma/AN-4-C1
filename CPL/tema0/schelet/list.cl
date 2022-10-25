@@ -55,15 +55,19 @@ class List {
     };
 
     toString(index: Int):String {
-        case elem of
-            l: List => if not isVoid next then new A2I.i2a(index + 1).concat(": [ ").concat(l.toString(index)).concat(" ]\n").concat(next.toString(index + 1)) else new A2I.i2a(index + 1).concat(": [ ").concat(l.toString(index)).concat(" ]\n") fi;
-            p: Product => if not isVoid next then p.toString().concat(", ").concat(next.toString(index)) else p.toString() fi;
-            r: Rank => if not isVoid next then r.toString().concat(", ").concat(next.toString(index)) else r.toString() fi;
-            s: String => if not isVoid next then s.type_name().concat("(").concat(s).concat(")").concat(", ").concat(next.toString(index)) else s.type_name().concat("(").concat(s).concat(")") fi;
-            i: Int => if not isVoid next then i.type_name().concat("(").concat(new A2I.i2a(i)).concat(")").concat(", ").concat(next.toString(index)) else i.type_name().concat("(").concat(new A2I.i2a(i)).concat(")") fi;
-            b: Bool => if not isVoid next then b.type_name().concat("(").concat(if b = true then "true" else "false" fi).concat(")").concat(", ").concat(next.toString(index)) else b.type_name().concat("(").concat(if b = true then "true" else "false" fi).concat(")") fi;
-            io: IO => if not isVoid next then io.type_name().concat("(").concat(")").concat(next.toString(index)) else io.type_name().concat("(").concat(")") fi;
-        esac
+        if isVoid elem then
+            ""
+        else
+            case elem of
+                l: List => if not isVoid next then new A2I.i2a(index + 1).concat(": [ ").concat(l.toString(index)).concat(" ]\n").concat(next.toString(index + 1)) else new A2I.i2a(index + 1).concat(": [ ").concat(l.toString(index)).concat(" ]\n") fi;
+                p: Product => if not isVoid next then p.toString().concat(", ").concat(next.toString(index)) else p.toString() fi;
+                r: Rank => if not isVoid next then r.toString().concat(", ").concat(next.toString(index)) else r.toString() fi;
+                s: String => if not isVoid next then s.type_name().concat("(").concat(s).concat(")").concat(", ").concat(next.toString(index)) else s.type_name().concat("(").concat(s).concat(")") fi;
+                i: Int => if not isVoid next then i.type_name().concat("(").concat(new A2I.i2a(i)).concat(")").concat(", ").concat(next.toString(index)) else i.type_name().concat("(").concat(new A2I.i2a(i)).concat(")") fi;
+                b: Bool => if not isVoid next then b.type_name().concat("(").concat(if b = true then "true" else "false" fi).concat(")").concat(", ").concat(next.toString(index)) else b.type_name().concat("(").concat(if b = true then "true" else "false" fi).concat(")") fi;
+                io: IO => if not isVoid next then io.type_name().concat("(").concat(")").concat(next.toString(index)) else io.type_name().concat("(").concat(")") fi;
+            esac
+        fi
     };
 
     merge(other : List): SELF_TYPE {
@@ -89,27 +93,33 @@ class List {
         }
     };
 
-    filterBy(f: Filter): SELF_TYPE {
+    setElemAtIndex(el: Object, index: Int): SELF_TYPE {
         {
-            let
-                iterator_1: List <- self,
-                iterator_2: List
-            in {
-                while not isVoid iterator_1 loop
-                    if f.filter(iterator_1.elem()) then
-                        self
-                    else
-                        if not isVoid iterator_2
-                            iterator_2.setNext(next)
-                        else
-                            self <- next
-                        fi
-                    fi;
-                    iterator_2 <- iterator_1;
-                    iterator_1 <- iterator_1.next();
-                pool;
-            };
+            if index = 0 then
+                setElem(el)
+            else
+                next.setElemAtIndex(el, index - 1)
+            fi;
             self;
+        }
+    };
+
+    filterBy(f: Filter): List {
+        let
+            iterator: List <- self,
+            result: List <- new List
+        in 
+        {
+            while not isVoid iterator loop {
+                if f.filter(iterator.elem()) then {
+                    result.add(iterator.elem());
+                    iterator <- iterator.next();
+                }
+                else
+                    iterator <- iterator.next()
+                fi;
+            } pool;
+            result;
         }
     };
 

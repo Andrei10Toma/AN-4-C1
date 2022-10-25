@@ -1,20 +1,12 @@
-Soda a 1 100
-Private i
-Soda a 2 200
-Private j
-Soda a 3 300
-Private k
-Soda a 4 400
-Private l
-Coffee b 1 100
-Officer i
-Coffee b 2 200
-Officer j
-Coffee b 3 300
-Officer k
-Coffee b 4 400
-Officer l
-String whatever
+Soda a 129 100
+Coffee b 238 200
+Router c 357 300
+Laptop d 975 400
+Soda e 565 500
+Coffee f 714 600
+Router g 833 700
+Laptop h 1451 800
+Soda e2 674 600
 END
-filterBy 1 ProductFilter
+sortBy 1 PriceComparator ascendent
 print 1

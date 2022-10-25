@@ -118,9 +118,17 @@ class Main inherits IO{
                                             index_1 <- a2i.a2i(tokenizer.next());
                                             aux_string <- tokenizer.next();
                                             if aux_string = "ProductFilter" then
-                                                cast_object_to_list(lists.get(index_1 - 1)).filterBy(new ProductFilter)
+                                                lists.setElemAtIndex(cast_object_to_list(lists.get(index_1 - 1)).filterBy(new ProductFilter), index_1 - 1)
                                             else
-                                                abort()
+                                                if aux_string = "RankFilter" then
+                                                    lists.setElemAtIndex(cast_object_to_list(lists.get(index_1 - 1)).filterBy(new RankFilter), index_1 - 1)
+                                                else
+                                                    if aux_string = "SamePriceFilter" then
+                                                        lists.setElemAtIndex(cast_object_to_list(lists.get(index_1 - 1)).filterBy(new SamePriceFilter), index_1 - 1)
+                                                    else
+                                                        abort()
+                                                    fi
+                                                fi
                                             fi;
                                         }
                                         else

@@ -26,3 +26,12 @@ class RankFilter inherits Filter {
         esac
     };
 };
+
+class SamePriceFilter inherits Filter {
+    filter(o : Object): Bool {
+        case o of
+            x: Product => x@Product.getprice() = x.getprice();
+            y: Object => false;
+        esac
+    };
+};
