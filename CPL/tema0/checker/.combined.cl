@@ -216,8 +216,43 @@ numbers are handled correctly.
         }
     };
 
-    sortBy():SELF_TYPE {
-        self (* TODO *)
+    sortBy(c: Comparator, sort_type: String): SELF_TYPE {
+        let
+            iterator: List <- self,
+            sorted: Bool <- false,
+            swap_obj: Object
+        in
+        {
+            if isVoid elem then
+                self
+            else
+                if isVoid next then
+                    self
+                else {
+                    while not sorted loop {
+                        sorted <- true;
+                        iterator <- self;
+                        while not isVoid iterator.next() loop {
+                            if 0 < if sort_type = "ascendent" then c.compareTo(iterator.elem(), iterator.next().elem()) else c.compareTo(iterator.next().elem(), iterator.elem()) fi
+                            then {
+                                swap_obj <- iterator.elem();
+                                iterator.setElem(iterator.next().elem());
+                                iterator.next().setElem(swap_obj);
+                                iterator <- iterator.next();
+                                sorted <- false;
+                            }
+                            else
+                                iterator <- iterator.next()
+                            fi;
+                        }
+                        pool;
+                    }
+                    pool;
+                }
+                fi
+            fi;
+            self;
+        }
     };
 };class Main inherits IO{
     lists : List <- new List;
@@ -353,7 +388,26 @@ numbers are handled correctly.
                                             fi;
                                         }
                                         else
-                                            abort()
+                                            if type = "sortBy" then {
+                                                index_1 <- a2i.a2i(tokenizer.next());
+                                                aux_string <- tokenizer.next();
+                                                if aux_string = "PriceComparator" then
+                                                    cast_object_to_list(lists.get(index_1 - 1)).sortBy(new PriceComparator, tokenizer.next())
+                                                else
+                                                    if aux_string = "RankComparator" then
+                                                        cast_object_to_list(lists.get(index_1 - 1)).sortBy(new RankComparator, tokenizer.next())
+                                                    else
+                                                        if aux_string = "AlphabeticComparator" then
+                                                            cast_object_to_list(lists.get(index_1 - 1)).sortBy(new AlphabeticComparator, tokenizer.next())
+                                                        else
+                                                            abort()
+                                                        fi
+                                                    fi
+                                                fi;
+                                            }
+                                            else
+                                                abort()
+                                            fi
                                         fi
                                     fi
                                 fi
@@ -468,18 +522,38 @@ class Rank {
         }
     };
 
+    getScore(): Int {
+        0
+    };
+
     toString():String {
         type_name().concat("(").concat(name).concat(")")
     };
 };
 
-class Private inherits Rank {};
+class Private inherits Rank {
+    getScore(): Int {
+        1
+    };
+};
 
-class Corporal inherits Private {};
+class Corporal inherits Private {
+    getScore(): Int {
+        2
+    };
+};
 
-class Sergent inherits Corporal {};
+class Sergent inherits Corporal {
+    getScore(): Int {
+        3
+    };
+};
 
-class Officer inherits Sergent {};(* Think of these as abstract classes *)
+class Officer inherits Sergent {
+    getScore(): Int {
+        4
+    };
+};(* Think of these as abstract classes *)
 class Comparator {
     compareTo(o1 : Object, o2 : Object):Int {0};
 };
@@ -514,5 +588,65 @@ class SamePriceFilter inherits Filter {
             x: Product => x@Product.getprice() = x.getprice();
             y: Object => false;
         esac
+    };
+};
+
+class PriceComparator inherits Comparator {
+    compareTo(o1 : Object, o2 : Object): Int {
+        let
+            diff: Int
+        in
+        {
+            case o1 of
+                p1: Product => {
+                    case o2 of
+                        p2: Product => diff <- p1.getprice() - p2.getprice();
+                        y: Object => abort();
+                    esac;
+                };
+                x: Object => abort();
+            esac;
+            diff;
+        }
+    };
+};
+
+class RankComparator inherits Comparator {
+    compareTo(o1: Object, o2: Object): Int {
+        let
+            diff: Int
+        in
+        {
+            case o1 of
+                r1: Rank => {
+                    case o2 of
+                        r2: Rank => diff <- r1.getScore() - r2.getScore();
+                        y: Object => abort();
+                    esac;
+                };
+                x: Object => abort();
+            esac;
+            diff;
+        }
+    };
+};
+
+class AlphabeticComparator inherits Comparator {
+    compareTo(o1: Object, o2: Object): Int {
+        let
+            diff: Int
+        in
+        {
+            case o1 of
+                s1: String => {
+                    case o2 of
+                        s2: String => diff <- if s1 < s2 then (0 - 1) else if s1 = s2 then 0 else 1 fi fi;
+                        y: Object => abort();
+                    esac;
+                };
+                x: Object => abort();
+            esac;
+            diff;
+        }
     };
 };

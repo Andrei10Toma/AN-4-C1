@@ -1,12 +1,24 @@
-Soda a 129 100
-Coffee b 238 200
-Router c 357 300
-Laptop d 975 400
-Soda e 565 500
-Coffee f 714 600
-Router g 833 700
-Laptop h 1451 800
-Soda e2 674 600
+String ac
+String aba
+String abb
+String aca
+String ab
+String acc
+String acb
+String ba
+String abc
+String a
+String aab
+String b
+String c
+String aa
+String cb
+String cc
+String aaa
+String aac
+String bb
+String ca
+String bc
 END
-sortBy 1 PriceComparator ascendent
+sortBy 1 AlphabeticComparator descendent
 print 1

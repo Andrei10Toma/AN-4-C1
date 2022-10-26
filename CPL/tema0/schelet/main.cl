@@ -132,7 +132,26 @@ class Main inherits IO{
                                             fi;
                                         }
                                         else
-                                            abort()
+                                            if type = "sortBy" then {
+                                                index_1 <- a2i.a2i(tokenizer.next());
+                                                aux_string <- tokenizer.next();
+                                                if aux_string = "PriceComparator" then
+                                                    cast_object_to_list(lists.get(index_1 - 1)).sortBy(new PriceComparator, tokenizer.next())
+                                                else
+                                                    if aux_string = "RankComparator" then
+                                                        cast_object_to_list(lists.get(index_1 - 1)).sortBy(new RankComparator, tokenizer.next())
+                                                    else
+                                                        if aux_string = "AlphabeticComparator" then
+                                                            cast_object_to_list(lists.get(index_1 - 1)).sortBy(new AlphabeticComparator, tokenizer.next())
+                                                        else
+                                                            abort()
+                                                        fi
+                                                    fi
+                                                fi;
+                                            }
+                                            else
+                                                abort()
+                                            fi
                                         fi
                                     fi
                                 fi

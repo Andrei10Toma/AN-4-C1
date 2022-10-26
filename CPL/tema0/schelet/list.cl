@@ -123,7 +123,42 @@ class List {
         }
     };
 
-    sortBy():SELF_TYPE {
-        self (* TODO *)
+    sortBy(c: Comparator, sort_type: String): SELF_TYPE {
+        let
+            iterator: List <- self,
+            sorted: Bool <- false,
+            swap_obj: Object
+        in
+        {
+            if isVoid elem then
+                self
+            else
+                if isVoid next then
+                    self
+                else {
+                    while not sorted loop {
+                        sorted <- true;
+                        iterator <- self;
+                        while not isVoid iterator.next() loop {
+                            if 0 < if sort_type = "ascendent" then c.compareTo(iterator.elem(), iterator.next().elem()) else c.compareTo(iterator.next().elem(), iterator.elem()) fi
+                            then {
+                                swap_obj <- iterator.elem();
+                                iterator.setElem(iterator.next().elem());
+                                iterator.next().setElem(swap_obj);
+                                iterator <- iterator.next();
+                                sorted <- false;
+                            }
+                            else
+                                iterator <- iterator.next()
+                            fi;
+                        }
+                        pool;
+                    }
+                    pool;
+                }
+                fi
+            fi;
+            self;
+        }
     };
 };
