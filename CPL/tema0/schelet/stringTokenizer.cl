@@ -38,7 +38,8 @@ class StringTokenizer {
                             index <- index + 1
                         fi
                     fi;
-                } pool;
+                }
+                pool;
 
                 string.substr(tmp_index, index - tmp_index - 1);
             }

@@ -159,7 +159,8 @@ class Main inherits IO{
                         fi
                     fi;
                 };
-            } pool;
+            }
+            pool;
         }
     };
 };

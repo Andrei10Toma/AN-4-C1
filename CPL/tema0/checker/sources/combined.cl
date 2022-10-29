@@ -415,7 +415,8 @@ numbers are handled correctly.
                         fi
                     fi;
                 };
-            } pool;
+            }
+            pool;
         }
     };
 };class StringTokenizer {
@@ -458,7 +459,8 @@ numbers are handled correctly.
                             index <- index + 1
                         fi
                     fi;
-                } pool;
+                }
+                pool;
 
                 string.substr(tmp_index, index - tmp_index - 1);
             }
