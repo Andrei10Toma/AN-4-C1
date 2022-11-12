@@ -1,0 +1,8 @@
+"14-case.cl", line 3:9, Syntax error: extraneous input 'case' expecting {FALSE, NOT, TRUE, ID, INT, '(', '~', STRING}
+"14-case.cl", line 3:16, Syntax error: mismatched input 'of' expecting {'}', '+', '-', '*', '/', '=', '<', '<='}
+line 4:24 token recognition error at: '>'
+line 5:24 token recognition error at: '>'
+"14-case.cl", line 5:24, Syntax error: mismatched input '=' expecting {';', '<-'}
+"14-case.cl", line 6:13, Syntax error: extraneous input 'o' expecting {<EOF>, CLASS}
+line 6:24 token recognition error at: '>'
+Compilation halted

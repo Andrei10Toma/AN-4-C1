@@ -1,0 +1,2 @@
+"09-new-isvoid.cl", line 3:13, Syntax error: mismatched input 'isvoid' expecting {FALSE, NOT, TRUE, ID, INT, '(', '~', STRING}
+Compilation halted
