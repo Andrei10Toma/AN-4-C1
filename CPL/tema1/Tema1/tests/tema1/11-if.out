@@ -1,3 +1,17 @@
-"11-if.cl", line 3:9, Syntax error: extraneous input 'if' expecting {FALSE, NOT, TRUE, ID, INT, '(', '~', STRING}
-"11-if.cl", line 3:19, Syntax error: mismatched input 'then' expecting {'}', '+', '-', '*', '/', '=', '<', '<='}
-Compilation halted
+program
+  class
+    A
+    method
+      f
+      formal
+        x
+        Int
+      Int
+      if
+        <=
+          x
+          5
+        x
+        +
+          x
+          1

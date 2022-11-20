@@ -18,4 +18,15 @@ public interface ASTVisitor<T> {
     T visit(NotExpression notExpression);
     T visit(ComplementExpression complementExpression);
     T visit(AssignExpression assignExpression);
+    T visit(IsVoidExpression isVoidExpression);
+    T visit(NewExpression newExpression);
+    T visit(DispatchFunctionCallExpression dispatchFunctionCallExpression);
+    T visit(FunctionCallExpression functionCallExpression);
+    T visit(IfExpression ifExpression);
+    T visit(WhileExpression whileExpression);
+    T visit(Local local);
+    T visit(LetExpression letExpression);
+    T visit(CaseBranch caseBranch);
+    T visit(CaseExpression caseExpression);
+    T visit(BlockExpression blockExpression);
 }

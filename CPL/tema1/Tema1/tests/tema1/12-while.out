@@ -1,3 +1,18 @@
-"12-while.cl", line 3:9, Syntax error: extraneous input 'while' expecting {FALSE, NOT, TRUE, ID, INT, '(', '~', STRING}
-"12-while.cl", line 3:21, Syntax error: mismatched input 'loop' expecting {'}', '+', '-', '*', '/', '=', '<', '<='}
-Compilation halted
+program
+  class
+    A
+    method
+      f
+      formal
+        x
+        Int
+      Object
+      while
+        <
+          0
+          x
+        <-
+          x
+          -
+            x
+            1

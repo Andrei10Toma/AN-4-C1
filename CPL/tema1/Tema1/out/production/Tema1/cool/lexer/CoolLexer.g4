@@ -41,12 +41,10 @@ fragment LETTER : [a-zA-Z];
  * Type identifiers
  */
 TYPE : [A-Z](LETTER | '_' | DIGIT)*;
-SELF_TYPE : 'SELF_TYPE';
 
 /*
  * Identifier
  */
-SELF: 'self';
 ID : [a-z](LETTER | '_' | DIGIT)*;
 
 /*
@@ -75,12 +73,48 @@ LT : '<';
 LE : '<=';
 COLON: ':';
 AT: '@';
-STRING : '"' ('\\"' | .)*? '"' {
+DOT: '.';
+IMPLIES: '=>';
+STRING : '"' ('\\"' | '\\' NEW_LINE | .)*? ('"' {
     String s = getText();
-    String s_without_quotes = s.substring(1, s.length() - 1);
-    setText(s_without_quotes);
-};
+    s = s.substring(1, s.length() - 1);
+    s = s.replaceAll("\\\\t", "\t");
+    s = s.replaceAll("\\\\n", "\n");
+    s = s.replaceAll("\\\\b", "\b");
+    s = s.replaceAll("\\\\f", "\f");
+    s = s.replaceAll("(\\\\)(.*)", "$2");
+    if (s.length() > 1024) {
+        raiseError("String constant too long");
+        return;
+    }
+    if (s.indexOf('\u0000') != -1) {
+        raiseError("String contains null character");
+        return;
+    }
+    setText(s);
+}
+    | NEW_LINE { raiseError("Unterminated string constant"); }
+    | EOF { raiseError("EOF in string constant"); }
+);
+
+/*
+ * Comments
+ */
+fragment NEW_LINE : '\r'? '\n';
+LINE_COMMENT
+    : '--' .*? (NEW_LINE | EOF) -> skip
+    ;
+
+BLOCK_COMMENT
+    : '(*'
+      (BLOCK_COMMENT | .)*?
+      ('*)' { skip(); } | EOF { raiseError("EOF in comment"); })
+    ;
+
+BAD_COMMENT: '*)' { raiseError("Unmatched *)"); };
 
 WS
     :   [ \n\f\r\t]+ -> skip
     ;
+
+INVALID_CHARACTER: . { raiseError("Invalid character: " + getText()); };

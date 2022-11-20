@@ -1,3 +1,23 @@
-"13-let.cl", line 3:9, Syntax error: extraneous input 'let' expecting {FALSE, NOT, TRUE, ID, INT, '(', '~', STRING}
-"13-let.cl", line 3:15, Syntax error: mismatched input ':' expecting {'}', '+', '-', '*', '/', '=', '<', '<='}
-Compilation halted
+program
+  class
+    A
+    method
+      f
+      formal
+        x
+        Int
+      Int
+      let
+        local
+          x
+          Int
+          +
+            x
+            1
+        local
+          y
+          Int
+          +
+            x
+            1
+        x

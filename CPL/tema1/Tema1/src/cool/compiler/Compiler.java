@@ -10,11 +10,14 @@ import cool.parser.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class Compiler {
     // Annotates class nodes with the names of files where they are defined.
     public static ParseTreeProperty<String> fileNames = new ParseTreeProperty<>();
+
 
     public static void main(String[] args) throws IOException {
         if (args.length == 0) {
@@ -48,7 +51,7 @@ public class Compiler {
                 tokenStream.setTokenSource(lexer);
 
             // Test lexer only.
-           /* tokenStream.fill();
+            /*tokenStream.fill();
             List<Token> tokens = tokenStream.getTokens();
             tokens.stream().forEach(token -> {
                 var text = token.getText();
@@ -223,6 +226,84 @@ public class Compiler {
                         ctx.variable,
                         (Expression) visit(ctx.expression));
             }
+
+            @Override
+            public ASTNode visitNewExpression(CoolParser.NewExpressionContext ctx) {
+                return new NewExpression(ctx.start, ctx.type);
+            }
+
+            @Override
+            public ASTNode visitIsVoidExpression(CoolParser.IsVoidExpressionContext ctx) {
+                return new IsVoidExpression(ctx.start, (Expression) visit(ctx.expression));
+            }
+
+            @Override
+            public ASTNode visitDispatchFunctionCall(CoolParser.DispatchFunctionCallContext ctx) {
+                List<Expression> callArgs = new ArrayList<>();
+                if (ctx.callArgs != null)
+                    ctx.callArgs.forEach(callArg -> callArgs.add((Expression) visit(callArg)));
+                return new DispatchFunctionCallExpression(ctx.start,
+                        (Expression) visit(ctx.expression),
+                        ctx.type,
+                        ctx.name,
+                        callArgs);
+            }
+
+            @Override
+            public ASTNode visitFunctionCall(CoolParser.FunctionCallContext ctx) {
+                List<Expression> callArgs = new ArrayList<>();
+                if (ctx.callArgs != null)
+                    ctx.callArgs.forEach(callArg -> callArgs.add((Expression) visit(callArg)));
+                return new FunctionCallExpression(ctx.start, ctx.name, callArgs);
+            }
+
+            @Override
+            public ASTNode visitIfExpression(CoolParser.IfExpressionContext ctx) {
+                return new IfExpression(ctx.start,
+                        (Expression) visit(ctx.cond),
+                        (Expression) visit(ctx.ifBranch),
+                        (Expression) visit(ctx.elseBranch)
+                );
+            }
+
+            @Override
+            public ASTNode visitWhileExpression(CoolParser.WhileExpressionContext ctx) {
+                return new WhileExpression(ctx.start,
+                        (Expression) visit(ctx.cond),
+                        (Expression) visit(ctx.expression));
+            }
+
+            @Override
+            public ASTNode visitLocal(CoolParser.LocalContext ctx) {
+                return new Local(ctx.start, ctx.name, ctx.type,
+                        ctx.expression != null ? (Expression) visit(ctx.expression) : null);
+            }
+
+            @Override
+            public ASTNode visitLetExpression(CoolParser.LetExpressionContext ctx) {
+                List<Local> locals = new ArrayList<>();
+                ctx.variables.forEach(variable -> locals.add((Local) visit(variable)));
+                return new LetExpression(ctx.start, locals, (Expression) visit(ctx.expression));
+            }
+
+            @Override
+            public ASTNode visitCaseBranch(CoolParser.CaseBranchContext ctx) {
+                return new CaseBranch(ctx.start, ctx.name, ctx.type, (Expression) visit(ctx.expression));
+            }
+
+            @Override
+            public ASTNode visitCaseExpression(CoolParser.CaseExpressionContext ctx) {
+                List<CaseBranch> caseBranches = new ArrayList<>();
+                ctx.caseBranch().forEach(caseBranch -> caseBranches.add((CaseBranch) visit(caseBranch)));
+                return new CaseExpression(ctx.start, (Expression) visit(ctx.expression), caseBranches);
+            }
+
+            @Override
+            public ASTNode visitBlockExpression(CoolParser.BlockExpressionContext ctx) {
+                List<Expression> expressions = new ArrayList<>();
+                ctx.expr().forEach(expression -> expressions.add((Expression) visit(expression)));
+                return new BlockExpression(ctx.start, expressions);
+            }
         };
 
         var ast = astConstructorVisitor.visit(globalTree);
@@ -375,6 +456,120 @@ public class Compiler {
                 indent++;
                 printIndent(assignExpression.variable.getText());
                 assignExpression.expr.accept(this);
+                indent--;
+                return null;
+            }
+
+            @Override
+            public Void visit(IsVoidExpression isVoidExpression) {
+                printIndent("isvoid");
+                indent++;
+                isVoidExpression.expr.accept(this);
+                indent--;
+                return null;
+            }
+
+            @Override
+            public Void visit(NewExpression newExpression) {
+                printIndent("new");
+                indent++;
+                printIndent(newExpression.type.getText());
+                indent--;
+                return null;
+            }
+
+            @Override
+            public Void visit(DispatchFunctionCallExpression dispatchFunctionCallExpression) {
+                printIndent(".");
+                indent++;
+                dispatchFunctionCallExpression.expr.accept(this);
+                if (dispatchFunctionCallExpression.type != null)
+                    printIndent(dispatchFunctionCallExpression.type.getText());
+                printIndent(dispatchFunctionCallExpression.name.getText());
+                dispatchFunctionCallExpression.callArgs.forEach(callArg -> callArg.accept(this));
+                indent--;
+                return null;
+            }
+
+            @Override
+            public Void visit(FunctionCallExpression functionCallExpression) {
+                printIndent("implicit dispatch");
+                indent++;
+                printIndent(functionCallExpression.name.getText());
+                functionCallExpression.callArgs.forEach(callArg -> callArg.accept(this));
+                indent--;
+                return null;
+            }
+
+            @Override
+            public Void visit(IfExpression ifExpression) {
+                printIndent("if");
+                indent++;
+                ifExpression.condition.accept(this);
+                ifExpression.ifBranch.accept(this);
+                ifExpression.elseBranch.accept(this);
+                indent--;
+                return null;
+            }
+
+            @Override
+            public Void visit(WhileExpression whileExpression) {
+                printIndent("while");
+                indent++;
+                whileExpression.condition.accept(this);
+                whileExpression.expr.accept(this);
+                indent--;
+                return null;
+            }
+
+            @Override
+            public Void visit(Local local) {
+                printIndent("local");
+                indent++;
+                printIndent(local.name.getText());
+                printIndent(local.type.getText());
+                if (local.expression != null)
+                    local.expression.accept(this);
+                indent--;
+                return null;
+            }
+
+            @Override
+            public Void visit(LetExpression letExpression) {
+                printIndent("let");
+                indent++;
+                letExpression.locals.forEach(local -> local.accept(this));
+                letExpression.expression.accept(this);
+                indent--;
+                return null;
+            }
+
+            @Override
+            public Void visit(CaseBranch caseBranch) {
+                printIndent("case branch");
+                indent++;
+                printIndent(caseBranch.name.getText());
+                printIndent(caseBranch.type.getText());
+                caseBranch.expression.accept(this);
+                indent--;
+                return null;
+            }
+
+            @Override
+            public Void visit(CaseExpression caseExpression) {
+                printIndent("case");
+                indent++;
+                caseExpression.expression.accept(this);
+                caseExpression.branches.forEach(branch -> branch.accept(this));
+                indent--;
+                return null;
+            }
+
+            @Override
+            public Void visit(BlockExpression blockExpression) {
+                printIndent("block");
+                indent++;
+                blockExpression.expressions.forEach(expression -> expression.accept(this));
                 indent--;
                 return null;
             }

@@ -4,21 +4,22 @@ program
     attribute
       s1
       String
-      ab\tcd
+      ab	cd
     attribute
       s2
       String
-      ab\ncd
+      ab
+cd
     attribute
       s3
       String
-      ab\
+      ab
 cd
     attribute
       s4
       String
-      ab\\cd
+      ab\cd
     attribute
       s5
       String
-      ab\zcd
+      abzcd

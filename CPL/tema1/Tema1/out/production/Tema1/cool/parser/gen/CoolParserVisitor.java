@@ -45,12 +45,31 @@ public interface CoolParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitProgram(CoolParser.ProgramContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link CoolParser#local}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLocal(CoolParser.LocalContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CoolParser#caseBranch}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCaseBranch(CoolParser.CaseBranchContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code isVoidExpression}
 	 * labeled alternative in {@link CoolParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitIsVoidExpression(CoolParser.IsVoidExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code dispatchFunctionCall}
+	 * labeled alternative in {@link CoolParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDispatchFunctionCall(CoolParser.DispatchFunctionCallContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code string}
 	 * labeled alternative in {@link CoolParser#expr}.
@@ -59,12 +78,26 @@ public interface CoolParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitString(CoolParser.StringContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code whileExpression}
+	 * labeled alternative in {@link CoolParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhileExpression(CoolParser.WhileExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code relationalExpression}
 	 * labeled alternative in {@link CoolParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitRelationalExpression(CoolParser.RelationalExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code newExpression}
+	 * labeled alternative in {@link CoolParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNewExpression(CoolParser.NewExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code assignExpression}
 	 * labeled alternative in {@link CoolParser#expr}.
@@ -101,12 +134,40 @@ public interface CoolParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInt(CoolParser.IntContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code blockExpression}
+	 * labeled alternative in {@link CoolParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBlockExpression(CoolParser.BlockExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code plusMinusExpression}
 	 * labeled alternative in {@link CoolParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitPlusMinusExpression(CoolParser.PlusMinusExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code functionCall}
+	 * labeled alternative in {@link CoolParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionCall(CoolParser.FunctionCallContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code caseExpression}
+	 * labeled alternative in {@link CoolParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCaseExpression(CoolParser.CaseExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code letExpression}
+	 * labeled alternative in {@link CoolParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLetExpression(CoolParser.LetExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code true}
 	 * labeled alternative in {@link CoolParser#expr}.
@@ -128,6 +189,13 @@ public interface CoolParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitId(CoolParser.IdContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ifExpression}
+	 * labeled alternative in {@link CoolParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIfExpression(CoolParser.IfExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code complementExpression}
 	 * labeled alternative in {@link CoolParser#expr}.
