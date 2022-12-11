@@ -40,6 +40,10 @@ services:
       - mongo
     networks:
       - back
+    container_name: server
+    environment:
+      MONGO_USER: root
+      MONGO_PASS: example
 
 networks:
   front:

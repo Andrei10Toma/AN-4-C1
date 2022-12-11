@@ -1,9 +1,10 @@
 from flask import Flask, request, Response, jsonify
 from pymongo import MongoClient, ASCENDING, errors
 from datetime import datetime
+import os
 
 app = Flask(__name__)
-mongo_uri = 'mongodb://root:example@mongo_db:27017/'
+mongo_uri = f"mongodb://{os.getenv('MONGO_USER')}:{os.getenv('MONGO_PASS')}@mongo_db:27017/"
 mongo_client = MongoClient(mongo_uri)
 id_countries_counter = 1
 id_cities_counter = 1
@@ -74,6 +75,7 @@ def countries_by_id(id: int):
     elif request.method == 'DELETE':
         if not countries_collection.find_one( { 'id': id } ):
             return Response(status=404)
+        temperatures_collection.delete_many( { 'idOras': { '$in': cities_collection.find( { 'id_tara': id }, { 'id': 1 } ).distinct('id') } } )
         cities_collection.delete_many( { 'id_tara': id } )
         countries_collection.delete_one( { 'id': id } )
         return Response(status=200)
