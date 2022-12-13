@@ -1,29 +1,35 @@
-#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "utils.h"
-#include "omp.h"
+#include <iostream>
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
 
-void lu_decomposition(double **a, double **l, double **u, int n) {
-    int i = 0, j = 0, k = 0;
-    for (i = 0; i < n; i++) {
-        for (j = i; j < n; j++) {
-            l[j][i] = a[j][i];
-            for (k = 0; k < i; k++)
-                l[j][i] -= l[j][k] * u[k][i];
-        }
+void luDecomposition(double **matrix, double **lower, double **upper, int n) {
+	for (int i = 0; i < n; i++) {
+		for (int k = i; k < n; k++) {
+			double sum = 0;
+			for (int j = 0; j < i; j++)
+				sum += (lower[i][j] * upper[j][k]);
 
-        for (j = i; j < n; j++) {
-            if (j == i)
-                u[i][j] = (double) 1;
-            else {
-                u[i][j] = a[i][j] / l[i][i];
-                for (k = 0; k < i; k++)
-                    u[i][j] -= ((l[i][k] * u[k][j]) / l[i][i]);
-            }
-        }
-    }
+			upper[i][k] = matrix[i][k] - sum;
+		}
+
+		for (int k = i; k < n; k++) {
+			if (i == k) {
+				lower[i][i] = 1; 
+			} else {
+				double sum = 0;
+				for (int j = 0; j < i; j++)
+					sum += (lower[k][j] * upper[j][i]);
+
+				lower[k][i] = (matrix[k][i] - sum) / upper[i][i];
+			}
+		}
+	}
 }
 
 int main(int argc, char **argv)
@@ -41,7 +47,11 @@ int main(int argc, char **argv)
 
 	initialize_random_matrix(matrix, elements);
 
-	lu_decomposition(matrix, lower, upper, elements);
+    auto start = high_resolution_clock::now();
+	luDecomposition(matrix, lower, upper, elements);
+    auto end = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(end - start);
+    // cout << (double)duration.count() / 1000.0 << endl;
     print_matrix(lower, elements);
     cout << endl;
     print_matrix(upper, elements);
