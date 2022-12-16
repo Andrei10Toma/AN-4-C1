@@ -7,6 +7,7 @@
 #include <time.h>
 #include <iostream>
 #include "mpi.h"
+#include <omp.h>
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
@@ -17,10 +18,11 @@ using namespace std::chrono;
 
 
 void luDecomposition(double **matrix, double **lower, double **upper, int n, int rank, int num_procs) {
-
+    omp_set_num_threads(2);
 	for (int i = 0; i < n; i++) {
         int start = rank * ((double) (n - i)) / num_procs;
         int end = MIN((int)((rank + 1) * ((double) (n - i)) / num_procs), n - i);
+        #pragma omp parallel for
 		for (int k = i + start; k < i + end; k++) {
 			double sum = 0.0;
 			for (int j = 0; j < i; j++)
@@ -38,13 +40,14 @@ void luDecomposition(double **matrix, double **lower, double **upper, int n, int
             for (int j = 1; j < num_procs; j++) {
                 MPI_Send(&(upper[i][0]), n, MPI_DOUBLE, j, 0, MPI_COMM_WORLD);
             }
-            
+
         } else {
             MPI_Send(&(upper[i][i + start]), end - start, MPI_DOUBLE, MASTER, 0, MPI_COMM_WORLD);
             MPI_Recv(&(upper[i][0]), n, MPI_DOUBLE, MASTER, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
 
         double *column = (double *) calloc(n, sizeof(double));
+        #pragma omp parallel for
 		for (int k = i + start; k < i + end; k++) {
 			if (i == k) {
 				lower[i][i] = 1;
@@ -84,9 +87,9 @@ void luDecomposition(double **matrix, double **lower, double **upper, int n, int
 
 int main(int argc, char **argv)
 {
-    int rank, num_procs;
+    int rank, num_procs, provided;
     std::chrono::_V2::system_clock::time_point start;
-    MPI_Init(&argc, &argv);
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 

@@ -9,10 +9,10 @@ using namespace std;
 using namespace std::chrono;
 
 void luDecomposition(double **matrix, double **lower, double **upper, int n) {
-    for (int i = 0; i < n; i++) {
-        #pragma omp parallel shared(matrix, lower, upper)
-        {
-            #pragma omp for schedule(static, 5)
+    #pragma omp parallel shared(matrix, lower, upper)
+    {
+        for (int i = 0; i < n; i++) {
+            #pragma omp for schedule(static, 4)
             for (int k = i; k < n; k++) {
                 double sum = 0;
                 for (int j = 0; j < i; j++)
@@ -21,9 +21,7 @@ void luDecomposition(double **matrix, double **lower, double **upper, int n) {
                 upper[i][k] = matrix[i][k] - sum;
             }
 
-            #pragma omp barrier
-
-            #pragma omp for schedule(static, 5)
+            #pragma omp for schedule(static, 4)
             for (int k = i; k < n; k++) {
                 if (i == k) {
                     lower[i][i] = 1; 
@@ -58,7 +56,7 @@ int main(int argc, char **argv)
 	luDecomposition(matrix, lower, upper, elements);
     auto end = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(end - start);
-    // cout << double(duration.count()) / 1000.0 << endl;
+    // cout << elements << " " << double(duration.count()) / 1000.0 << endl;
     print_matrix(lower, elements);
     cout << endl;
     print_matrix(upper, elements);
