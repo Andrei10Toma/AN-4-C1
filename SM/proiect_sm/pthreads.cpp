@@ -24,7 +24,7 @@ struct thread_struct {
     int iteration;
 };
 
-void *thread_fn(void *arg) {
+void *compute_upper_line(void *arg) {
     struct thread_struct argument = * (struct thread_struct *) arg;
     int id = argument.thread_id;
     int n = argument.n;
@@ -80,7 +80,7 @@ void luDecomposition(double **matrix, double **lower, double **upper, int n) {
 
     pthread_t threads[NUM_THREADS];
     for (int j = 0; j < NUM_THREADS; j++) {
-        r = pthread_create(&threads[j], NULL, thread_fn, (void *) &arguments[j]);
+        r = pthread_create(&threads[j], NULL, compute_upper_line, (void *) &arguments[j]);
         if (r)
             throw_error(strdup("Error creating thread"));
     }
@@ -111,10 +111,10 @@ int main(int argc, char **argv)
 	luDecomposition(matrix, lower, upper, elements);
     auto end = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(end - start);
-    // cout << elements << " " << (double)duration.count() / 1000.0 << endl;
-    print_matrix(lower, elements);
-    cout << endl;
-    print_matrix(upper, elements);
+    cout << elements << " " << (double)duration.count() / 1000.0 << endl;
+    // print_matrix(lower, elements);
+    // cout << endl;
+    // print_matrix(upper, elements);
 
 	return 0;
 }

@@ -1,8 +1,9 @@
 CC=g++
 C_MPI=mpic++
 MPI_PROCS=4
+MPI_PROCS_HIBRID=4
 
-all: secv openmp pthreads mpi hibrid
+all: secv openmp pthreads mpi hibrid hibrid_2
 
 secv: secv.o utils.o
 	$(CC) $^ -o $@
@@ -15,6 +16,9 @@ pthreads: pthreads.o utils.o
 
 hibrid: hibrid.cpp utils.o
 	$(C_MPI) $^ -o $@ -fopenmp
+
+hibrid_2: hibrid_2.cpp utils.o
+	$(C_MPI) $^ -o $@ -lpthread
 
 mpi: mpi.cpp utils.o
 	$(C_MPI) $^ -o $@
@@ -30,7 +34,7 @@ pthreads.o: pthreads.cpp
 	$(CC) -c $< -o $@ -lpthread
 
 clean:
-	rm -rf *.o secv openmp pthreads mpi hibrid *.txt
+	rm -rf *.o secv openmp pthreads mpi hibrid hibrid_2
 
 run_secv: secv
 	./secv 50 >> secv_out.txt
@@ -73,11 +77,21 @@ run_mpi: mpi
 	mpirun -np $(MPI_PROCS) --oversubscribe mpi 3000 >> mpi_out.txt
 
 run_hibrid: hibrid
-	mpirun -np $(MPI_PROCS) --oversubscribe hibrid 50 >> hibrid_out.txt
-	mpirun -np $(MPI_PROCS) --oversubscribe hibrid 200 >> hibrid_out.txt
-	mpirun -np $(MPI_PROCS) --oversubscribe hibrid 500 >> hibrid_out.txt
-	mpirun -np $(MPI_PROCS) --oversubscribe hibrid 1000 >> hibrid_out.txt 
-	mpirun -np $(MPI_PROCS) --oversubscribe hibrid 1500 >> hibrid_out.txt 
-	mpirun -np $(MPI_PROCS) --oversubscribe hibrid 2000 >> hibrid_out.txt 
-	mpirun -np $(MPI_PROCS) --oversubscribe hibrid 2500 >> hibrid_out.txt 
-	mpirun -np $(MPI_PROCS) --oversubscribe hibrid 3000 >> hibrid_out.txt
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid 50 >> hibrid_out.txt
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid 200 >> hibrid_out.txt
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid 500 >> hibrid_out.txt
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid 1000 >> hibrid_out.txt 
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid 1500 >> hibrid_out.txt 
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid 2000 >> hibrid_out.txt 
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid 2500 >> hibrid_out.txt 
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid 3000 >> hibrid_out.txt
+
+run_hibrid_2: hibrid_2
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid_2 50 >> hibrid_2_out.txt
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid_2 200 >> hibrid_2_out.txt
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid_2 500 >> hibrid_2_out.txt
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid_2 1000 >> hibrid_2_out.txt 
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid_2 1500 >> hibrid_2_out.txt 
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid_2 2000 >> hibrid_2_out.txt 
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid_2 2500 >> hibrid_2_out.txt 
+	mpirun -np $(MPI_PROCS_HIBRID) --oversubscribe hibrid_2 3000 >> hibrid_2_out.txt

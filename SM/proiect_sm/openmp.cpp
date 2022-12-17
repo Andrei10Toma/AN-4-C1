@@ -56,10 +56,10 @@ int main(int argc, char **argv)
 	luDecomposition(matrix, lower, upper, elements);
     auto end = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(end - start);
-    // cout << elements << " " << double(duration.count()) / 1000.0 << endl;
-    print_matrix(lower, elements);
-    cout << endl;
-    print_matrix(upper, elements);
+    cout << elements << " " << double(duration.count()) / 1000.0 << endl;
+    // print_matrix(lower, elements);
+    // cout << endl;
+    // print_matrix(upper, elements);
 
 	return 0;
 }

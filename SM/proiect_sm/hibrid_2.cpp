@@ -12,24 +12,109 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
 #define MASTER 0
+#define NUM_THREADS 1
 
 using namespace std;
 using namespace std::chrono;
 
+struct thread_struct {
+    double **matrix;
+    double **lower;
+    double **upper;
+    double *column;
+    int n;
+    int thread_id;
+    int start;
+    int end;
+    int iteration;
+};
+
+void *compute_lower_column(void *arg) {
+    struct thread_struct argument = * (struct thread_struct *) arg;
+    int id = argument.thread_id;
+    int n = argument.n;
+    double **upper = argument.upper;
+    double **lower = argument.lower;
+    double **matrix = argument.matrix;
+    int arg_end = argument.end;
+    int arg_start = argument.start;
+    int i = argument.iteration;
+    double *column = argument.column;
+
+    int start = arg_start + id * (double)(arg_end - arg_start) / NUM_THREADS;
+    int end = arg_start + MIN((id + 1) * (double)(arg_end - arg_start) / NUM_THREADS, (arg_end - arg_start));
+
+    for (int k = i + start; k < i + end; k++) {
+        if (i == k) {
+            lower[i][i] = 1;
+        } else {
+            double sum = 0;
+            for (int j = 0; j < i; j++)
+                sum += (lower[k][j] * upper[j][i]);
+
+            lower[k][i] = (matrix[k][i] - sum) / upper[i][i];
+        }
+        column[k - start - i] = lower[k][i];
+    }
+
+    pthread_exit(NULL);
+}
+
+void *compute_upper_line(void *arg) {
+    struct thread_struct argument = * (struct thread_struct *) arg;
+    int id = argument.thread_id;
+    int n = argument.n;
+    double **upper = argument.upper;
+    double **lower = argument.lower;
+    double **matrix = argument.matrix;
+    int arg_end = argument.end;
+    int arg_start = argument.start;
+    int i = argument.iteration;
+
+    int start = arg_start + id * (double)(arg_end - arg_start) / NUM_THREADS;
+    int end = arg_start + MIN((id + 1) * (double)(arg_end - arg_start) / NUM_THREADS, (arg_end - arg_start));
+
+
+    for (int k = i + start; k < i + end; k++) {
+        double sum = 0.0;
+        for (int j = 0; j < i; j++)
+            sum += (lower[i][j] * upper[j][k]);
+
+        upper[i][k] = matrix[i][k] - sum;
+    }
+
+    pthread_exit(NULL);
+}
 
 void luDecomposition(double **matrix, double **lower, double **upper, int n, int rank, int num_procs) {
-    omp_set_num_threads(2);
-	for (int i = 0; i < n; i++) {
+	struct thread_struct arguments[NUM_THREADS];
+    pthread_t threads[NUM_THREADS];
+    int r;
+    for (int i = 0; i < NUM_THREADS; i++) {
+        arguments[i].n = n;
+        arguments[i].matrix = matrix;
+        arguments[i].lower = lower;
+        arguments[i].upper = upper;
+        arguments[i].thread_id = i;
+    }
+
+    for (int i = 0; i < n; i++) {
         int start = rank * ((double) (n - i)) / num_procs;
         int end = MIN((int)((rank + 1) * ((double) (n - i)) / num_procs), n - i);
-        #pragma omp parallel for
-		for (int k = i + start; k < i + end; k++) {
-			double sum = 0.0;
-			for (int j = 0; j < i; j++)
-				sum += (lower[i][j] * upper[j][k]);
+        for (int j = 0; j < NUM_THREADS; j++) {
+            arguments[j].start = start;
+            arguments[j].end = end;
+            arguments[j].iteration = i;
+            r = pthread_create(&threads[j], NULL, compute_upper_line, (void *) &arguments[j]);
+            if (r)
+                throw_error(strdup("Error creating thread"));
+        }
 
-			upper[i][k] = matrix[i][k] - sum;
-		}
+        for (int j = 0; j < NUM_THREADS; j++) {
+            r = pthread_join(threads[j], NULL);
+            if (r)
+                throw_error(strdup("Failed creating thread"));
+        }
 
         if (rank == MASTER) {
             for (int j = 1; j < num_procs; j++) {
@@ -47,19 +132,22 @@ void luDecomposition(double **matrix, double **lower, double **upper, int n, int
         }
 
         double *column = (double *) calloc(n, sizeof(double));
-        #pragma omp parallel for
-		for (int k = i + start; k < i + end; k++) {
-			if (i == k) {
-				lower[i][i] = 1;
-			} else {
-				double sum = 0;
-				for (int j = 0; j < i; j++)
-					sum += (lower[k][j] * upper[j][i]);
+        
+        for (int j = 0; j < NUM_THREADS; j++) {
+            arguments[j].column = column;
+            arguments[j].start = start;
+            arguments[j].end = end;
+            arguments[j].iteration = i;
+            r = pthread_create(&threads[j], NULL, compute_lower_column, (void *) &arguments[j]);
+            if (r)
+                throw_error(strdup("Error creating thread"));
+        }
 
-				lower[k][i] = (matrix[k][i] - sum) / upper[i][i];
-			}
-            column[k - start - i] = lower[k][i];
-		}
+        for (int j = 0; j < NUM_THREADS; j++) {
+            r = pthread_join(threads[j], NULL);
+            if (r)
+                throw_error(strdup("Failed creating thread"));
+        }
 
         double *full_column = (double *) calloc(n, sizeof(double));
         if (rank == MASTER) {

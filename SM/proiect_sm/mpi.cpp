@@ -122,11 +122,11 @@ int main(int argc, char **argv)
 
     if (rank == MASTER) {
         auto end = high_resolution_clock::now();
-        print_matrix(lower, elements);
-        cout << endl;
-        print_matrix(upper, elements);
+        // print_matrix(lower, elements);
+        // cout << endl;
+        // print_matrix(upper, elements);
         auto duration = duration_cast<milliseconds>(end - start);
-        // cout << elements << " " << (double)duration.count() / 1000.0 << endl;
+        cout << elements << " " << (double)duration.count() / 1000.0 << endl;
     }
     MPI_Finalize();
 	return 0;
