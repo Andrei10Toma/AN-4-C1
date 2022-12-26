@@ -10,6 +10,16 @@ import org.antlr.v4.runtime.Token;
 public class TypeDefinitionsVisitor implements ASTVisitor<Void> {
     @Override
     public Void visit(Program program) {
+        Symbol mainClass = SymbolTable.globals.lookup("Main");
+        if (!(mainClass instanceof TypeSymbol mainClassSymbol))
+            return null;
+
+        Symbol mainFunction = mainClassSymbol.lookupFunction("main");
+        if (mainFunction == null) {
+            SymbolTable.error(program.ctx, program.token,
+                    "No method main in class Main");
+            return null;
+        }
         program.classDefinitions.forEach(classDefinition -> classDefinition.accept(this));
         return null;
     }
