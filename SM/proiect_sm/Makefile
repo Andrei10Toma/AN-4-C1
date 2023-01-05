@@ -6,32 +6,34 @@ MPI_PROCS_HIBRID=4
 all: secv openmp pthreads mpi hibrid hibrid_2
 
 secv: secv.o utils.o
-	$(CC) $^ -o $@
+	$(CC) $^ -o $@ -g
 
 openmp: openmp.o utils.o
-	$(CC) $^ -o $@ -fopenmp
+	$(CC) $^ -o $@ -fopenmp -g
 
 pthreads: pthreads.o utils.o
-	$(CC) $^ -o $@ -lpthread
+	$(CC) $^ -o $@ -lpthread -g
 
 hibrid: hibrid.cpp utils.o
-	$(C_MPI) $^ -o $@ -fopenmp
+	$(C_MPI) $^ -o $@ -fopenmp -g
 
 hibrid_2: hibrid_2.cpp utils.o
-	$(C_MPI) $^ -o $@ -lpthread
+	$(C_MPI) $^ -o $@ -lpthread -g
 
 mpi: mpi.cpp utils.o
-	$(C_MPI) $^ -o $@
+	$(C_MPI) $^ -o $@ -g
 
 secv.o: secv.cpp
+	$(CC) -c $< -o $@ -g
 
 utils.o: utils.cpp
+	$(CC) -c $< -o $@ -g
 
 openmp.o: openmp.cpp
-	$(CC) -c $< -o $@ -fopenmp
+	$(CC) -c $< -o $@ -fopenmp -g
 
 pthreads.o: pthreads.cpp
-	$(CC) -c $< -o $@ -lpthread
+	$(CC) -c $< -o $@ -lpthread -g
 
 clean:
 	rm -rf *.o secv openmp pthreads mpi hibrid hibrid_2

@@ -1,0 +1,29 @@
+secv: 75,527s
+
+openmp (2 threads): 39,684s
+openmp (4 threads): 15,314s
+openmp (8 threads): 13,706s
+openmp (16 threads): 16,709s
+openmp (32 threads): 19,041s
+
+pthreads (2 threads): 40,513s
+pthreads (4 threads): 19,602s
+pthreads (8 threads): 14,475s
+pthreads (16 threads): 15,148s
+pthreads (32 threads): 16,152s
+
+mpi (2 procs): 41,009s
+mpi (4 procs): 19,912s
+mpi (8 procs): 19,596s
+mpi (16 procs): 54,729s
+mpi (32 procs): 88,339s
+
+hibrid (mpi + omp) (2 procs + 2 threads): 31,515s
+hibrid (mpi + omp) (4 procs + 2 threads): 16,623s
+hibrid (mpi + omp) (6 procs + 2 threads): 160,959s
+hibrid (mpi + omp) (8 procs + 2 threads): 223,578s
+
+hibrid (mpi + pthreads) (2 procs + 2 threads): 31,873s
+hibrid (mpi + pthreads) (4 procs + 2 threads): 20,659s
+hibrid (mpi + pthreads) (6 procs + 2 threads): 27,813s
+hibrid (mpi + pthreads) (8 procs + 2 threads): 35,450s
