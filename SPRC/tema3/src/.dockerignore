@@ -1,0 +1,6 @@
+../venv
+../config
+../.vscode
+../mosquito_log
+Dockerfile
+../stack.yml
