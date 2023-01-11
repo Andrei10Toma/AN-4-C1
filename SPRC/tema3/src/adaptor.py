@@ -61,7 +61,6 @@ def on_message(client, userdata, msg):
 if __name__ == '__main__':
     # create the database
     if not {'name': 'sprc3'} in db_client.get_list_database():
-        print('creating database...')
         db_client.create_database('sprc3')
     db_client.switch_database('sprc3')
 

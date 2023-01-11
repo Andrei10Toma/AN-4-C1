@@ -4,23 +4,19 @@ services:
     image: eclipse-mosquitto:2
     container_name: mqtt_broker
     volumes:
-      - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf
-      - ./mosquitto_log:/mosquitto/log
-      - broker_data:/mosquitto/data
+      - ${SPRC_DVP}/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ${SPRC_DVP}/mosquitto_log:/mosquitto/log
+      - ${SPRC_DVP}/broker_data:/mosquitto/data
     ports:
       - "1883:1883"
-    restart: always
     networks:
       - broker_adapter
 
   influxdb:
     image: influxdb:1.8.10
     container_name: influxdb
-    ports:
-      - "8086:8086"
     volumes:
-      - influxdb_data:/var/lib/influxdb
-    restart: always
+      - ${SPRC_DVP}/influxdb_data:/var/lib/influxdb
     networks:
       - db_adapter
       - db_interface
@@ -30,21 +26,19 @@ services:
     container_name: grafana
     ports:
       - "80:3000"
-    restart: always
     volumes:
-      - grafana_data:/var/lib/grafana
+      - ${SPRC_DVP}/grafana_data:/var/lib/grafana
     environment:
-      GF_SECURITY_ADMIN_USER: grafanaSPRC2021
-      GF_SECURITY_ADMIN_PASSWORD: asistent
+      GF_SECURITY_ADMIN_USER: asistent
+      GF_SECURITY_ADMIN_PASSWORD: grafanaSPRC2021
     networks:
       - db_interface
 
   mqtt_adapter:
     image: mqttadapter
     container_name: mqtt_adapter
-    restart: always
     environment:
-      DEBUG_DATA_FLOW: true
+      DEBUG_DATA_FLOW: "true"
     depends_on:
       - influxdb
       - mqtt_broker
@@ -56,8 +50,3 @@ networks:
   broker_adapter:
   db_adapter:
   db_interface:
-
-volumes:
-  broker_data: {}
-  influxdb_data: {}
-  grafana_data: {}
