@@ -1,0 +1,11 @@
+Exception in thread "main" java.lang.NullPointerException: Cannot invoke "org.antlr.v4.runtime.Token.getText()" because "inheritsId" is null
+	at cool.compiler.DefinitionPassVisitor.visit(DefinitionPassVisitor.java:37)
+	at cool.compiler.DefinitionPassVisitor.visit(DefinitionPassVisitor.java:11)
+	at cool.ast.ClassDefinition.accept(ClassDefinition.java:23)
+	at cool.compiler.DefinitionPassVisitor.lambda$visit$0(DefinitionPassVisitor.java:17)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at cool.compiler.DefinitionPassVisitor.visit(DefinitionPassVisitor.java:17)
+	at cool.compiler.DefinitionPassVisitor.visit(DefinitionPassVisitor.java:11)
+	at cool.ast.Program.accept(Program.java:17)
+	at cool.compiler.Compiler.main(Compiler.java:130)
+	at cool.tester.Tester1.main(Tester1.java:33)

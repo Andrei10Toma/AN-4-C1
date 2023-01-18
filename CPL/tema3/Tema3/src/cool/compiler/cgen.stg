@@ -1,0 +1,172 @@
+sequence(e) ::= "<e; separator=\"\n\">"
+sequenceSpaced(e) ::= "<e; separator=\"\n\n\">"
+
+basicTag(name, tag) ::= <<
+_<name>_tag:
+    .word <tag>
+>>
+
+program(tags, intConstants, stringConstants, boolTag, classNameTabs, classObjTabs, prototypeObjects, dispatchTabs, methods) ::= <<
+    .data
+    .align 2
+    .globl class_nameTab
+    .globl Int_protObj
+    .globl  String_protObj
+    .globl  bool_const0
+    .globl  bool_const1
+    .globl  Main_protObj
+    .globl  _int_tag
+    .globl  _string_tag
+    .globl  _bool_tag
+<tags>
+
+<stringConstants>
+<intConstants>
+
+bool_const0:
+    .word   <boolTag>
+    .word   4
+    .word   Bool_dispTab
+    .word   0
+bool_const1:
+    .word   <boolTag>
+    .word   4
+    .word   Bool_dispTab
+    .word   1
+
+class_nameTab:
+    <classNameTabs>
+
+class_objTab:
+    <classObjTabs>
+
+<prototypeObjects>
+<dispatchTabs>
+    .globl heap_start
+heap_start:
+    .word 0
+
+    .text
+    .globl  Int_init
+    .globl  String_init
+    .globl  Bool_init
+    .globl  Main_init
+    .globl  Main.main
+
+<methods>
+>>
+
+intConst(tag, counter, val) ::= <<
+int_const<counter>:
+    .word <tag>
+    .word 4
+    .word Int_dispTab
+    .word <val>
+>>
+
+stringConst(tag, counter, length, val, size) ::= <<
+str_const<counter>:
+    .word <tag>
+    .word <size>
+    .word String_dispTab
+    .word <length>
+    .asciiz "<val>"
+    .align 2
+>>
+
+initMethod(class, parent, attributes) ::= <<
+<class>_init:
+    addiu   $sp $sp -12
+    sw      $fp 12($sp)
+    sw      $s0 8($sp)
+    sw      $ra 4($sp)
+    addiu   $fp $sp 4
+    move    $s0 $a0
+    <if (parent)>
+    jal <parent>_init
+    <endif>
+    <if (attributes)>
+    <attributes>
+    <endif>
+    move    $a0 $s0
+    lw      $fp 12($sp)
+    lw      $s0 8($sp)
+    lw      $ra 4($sp)
+    addiu   $sp $sp 12
+    jr      $ra
+>>
+
+classProtObj(class, tag, size, attributes) ::= <<
+<class>_protObj:
+    .word   <tag>
+    .word   <size>
+    .word   <class>_dispTab
+    <attributes>
+>>
+
+classObjTabPair(class) ::= <<
+.word <class>_protObj
+.word <class>_init
+>>
+
+dispatchTable(class, methods) ::= <<
+<class>_dispTab:
+    <methods>
+>>
+
+functionDefinition(class, functionName, body) ::= <<
+<class>.<functionName>:
+    addiu   $sp $sp -12
+    sw      $fp 12($sp)
+    sw      $s0 8($sp)
+    sw      $ra 4($sp)
+    addiu   $fp $sp 4
+    move    $s0 $a0
+    <body>
+    lw      $fp 12($sp)
+    lw      $s0 8($sp)
+    lw      $ra 4($sp)
+    addiu   $sp $sp 12
+    jr      $ra
+>>
+
+literal(val) ::= <<
+la $a0 <val>
+>>
+
+storeField(offset) ::= <<
+sw $a0 <offset>($s0)
+>>
+
+saveParamOnStack(instruction) ::= <<
+<instruction>
+sw      $a0 0($sp)
+addiu   $sp $sp -4
+>>
+
+dispatchMethod(counter, filename, line, offset, explicit, parameters) ::= <<
+<if(parameters)>
+<parameters>
+<endif>
+<if(explicit)>
+<explicit>
+<else>
+move $a0 $s0
+<endif>
+bnez $a0 dispatch<counter>
+la $a0 <filename>
+li $t1 <line>
+jal _dispatch_abort
+dispatch<counter>:
+lw $t1 8($a0)
+lw $t1 <offset>($t1)
+jalr $t1
+>>
+
+self() ::= <<
+move $a0 $s0
+>>
+
+field(offset) ::= <<
+lw $a0 <offset>($s0)
+>>
