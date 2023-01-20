@@ -9,6 +9,7 @@ import java.util.List;
 public class LetExpression extends Expression {
     public final List<Local> locals;
     public final Expression expression;
+    public LetScope scope;
 
     public LetExpression(Token token, List<Local> locals, Expression expression, CoolParser.LetExpressionContext ctx) {
         super(token, ctx);

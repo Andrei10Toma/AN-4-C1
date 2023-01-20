@@ -114,6 +114,20 @@ str_const13:
     .word int_const5
     .asciiz "abc"
     .align 2
+str_const14:
+    .word 10
+    .word 11
+    .word String_dispTab
+    .word int_const7
+    .asciiz "16-let-init-ref-assign.cl"
+    .align 2
+str_const15:
+    .word 10
+    .word 5
+    .word String_dispTab
+    .word int_const5
+    .asciiz "def"
+    .align 2
 int_const0:
     .word 9
     .word 4
@@ -149,6 +163,16 @@ int_const6:
     .word 4
     .word Int_dispTab
     .word 100
+int_const7:
+    .word 9
+    .word 4
+    .word Int_dispTab
+    .word 25
+int_const8:
+    .word 9
+    .word 4
+    .word Int_dispTab
+    .word 117
 
 bool_const0:
     .word   11
@@ -611,6 +635,68 @@ Main.main:
     sw      $ra 4($sp)
     addiu   $fp $sp 4
     move    $s0 $a0
+    addiu $sp $sp -8
+    la $a0 int_const6
+    sw $a0 -4($fp)
+    la $a0 str_const13
+    sw $a0 -8($fp)
+
+    lw $a0 -4($fp)
+    sw      $a0 0($sp)
+    addiu   $sp $sp -4
+    move $a0 $s0
+    bnez $a0 dispatch0
+    la $a0 str_const14
+    li $t1 33
+    jal _dispatch_abort
+    dispatch0:
+    lw $t1 8($a0)
+    lw $t1 16($t1)
+    jalr $t1
+    la $a0 int_const8
+    sw $a0 -4($fp)
+
+    lw $a0 -4($fp)
+    sw      $a0 0($sp)
+    addiu   $sp $sp -4
+    move $a0 $s0
+    bnez $a0 dispatch1
+    la $a0 str_const14
+    li $t1 35
+    jal _dispatch_abort
+    dispatch1:
+    lw $t1 8($a0)
+    lw $t1 16($t1)
+    jalr $t1
+
+    lw $a0 -8($fp)
+    sw      $a0 0($sp)
+    addiu   $sp $sp -4
+    move $a0 $s0
+    bnez $a0 dispatch2
+    la $a0 str_const14
+    li $t1 37
+    jal _dispatch_abort
+    dispatch2:
+    lw $t1 8($a0)
+    lw $t1 12($t1)
+    jalr $t1
+    la $a0 str_const15
+    sw $a0 -8($fp)
+
+    lw $a0 -8($fp)
+    sw      $a0 0($sp)
+    addiu   $sp $sp -4
+    move $a0 $s0
+    bnez $a0 dispatch3
+    la $a0 str_const14
+    li $t1 39
+    jal _dispatch_abort
+    dispatch3:
+    lw $t1 8($a0)
+    lw $t1 12($t1)
+    jalr $t1
+    addiu $sp $sp 8
     lw      $fp 12($sp)
     lw      $s0 8($sp)
     lw      $ra 4($sp)

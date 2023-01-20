@@ -114,6 +114,13 @@ str_const13:
     .word int_const5
     .asciiz "abc"
     .align 2
+str_const14:
+    .word 10
+    .word 10
+    .word String_dispTab
+    .word int_const7
+    .asciiz "20-static-dispatch.cl"
+    .align 2
 int_const0:
     .word 9
     .word 4
@@ -149,6 +156,11 @@ int_const6:
     .word 4
     .word Int_dispTab
     .word 100
+int_const7:
+    .word 9
+    .word 4
+    .word Int_dispTab
+    .word 21
 
 bool_const0:
     .word   11
@@ -611,6 +623,83 @@ Main.main:
     sw      $ra 4($sp)
     addiu   $fp $sp 4
     move    $s0 $a0
+    addiu $sp $sp -12
+    la $a0 A_protObj
+    jal     Object.copy
+    jal     A_init
+    sw $a0 -4($fp)
+    la $a0 B_protObj
+    jal     Object.copy
+    jal     B_init
+    sw $a0 -8($fp)
+    la $a0 C_protObj
+    jal     Object.copy
+    jal     C_init
+    sw $a0 -12($fp)
+
+    lw $a0 -4($fp)
+    bnez $a0 dispatch1
+    la $a0 str_const14
+    li $t1 34
+    jal _dispatch_abort
+    dispatch1:
+    lw $t1 8($a0)
+    lw $t1 28($t1)
+    jalr $t1
+    sw      $a0 0($sp)
+    addiu   $sp $sp -4
+    move $a0 $s0
+    bnez $a0 dispatch0
+    la $a0 str_const14
+    li $t1 34
+    jal _dispatch_abort
+    dispatch0:
+    lw $t1 8($a0)
+    lw $t1 16($t1)
+    jalr $t1
+
+    lw $a0 -8($fp)
+    bnez $a0 dispatch3
+    la $a0 str_const14
+    li $t1 35
+    jal _dispatch_abort
+    dispatch3:
+    lw $t1 8($a0)
+    lw $t1 28($t1)
+    jalr $t1
+    sw      $a0 0($sp)
+    addiu   $sp $sp -4
+    move $a0 $s0
+    bnez $a0 dispatch2
+    la $a0 str_const14
+    li $t1 35
+    jal _dispatch_abort
+    dispatch2:
+    lw $t1 8($a0)
+    lw $t1 16($t1)
+    jalr $t1
+
+    lw $a0 -12($fp)
+    bnez $a0 dispatch5
+    la $a0 str_const14
+    li $t1 36
+    jal _dispatch_abort
+    dispatch5:
+    la $t1 A_dispTab
+    lw $t1 28($t1)
+    jalr $t1
+    sw      $a0 0($sp)
+    addiu   $sp $sp -4
+    move $a0 $s0
+    bnez $a0 dispatch4
+    la $a0 str_const14
+    li $t1 36
+    jal _dispatch_abort
+    dispatch4:
+    lw $t1 8($a0)
+    lw $t1 16($t1)
+    jalr $t1
+    addiu $sp $sp 12
     lw      $fp 12($sp)
     lw      $s0 8($sp)
     lw      $ra 4($sp)

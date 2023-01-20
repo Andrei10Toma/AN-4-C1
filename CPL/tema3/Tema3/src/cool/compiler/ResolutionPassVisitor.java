@@ -4,15 +4,13 @@ import cool.ast.*;
 import cool.structures.*;
 import org.antlr.v4.runtime.Token;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ResolutionPassVisitor implements ASTVisitor<TypeSymbol> {
     Scope currentScope;
     int fieldCounter = 0;
     int methodCounter = 0;
+    int localCounter = 0;
 
     @Override
     public TypeSymbol visit(Program program) {
@@ -31,6 +29,7 @@ public class ResolutionPassVisitor implements ASTVisitor<TypeSymbol> {
             classDefinition.type.parent.children.add(classDefinition.type);
         }
         fieldCounter = 0;
+        methodCounter = 0;
         classDefinition.features.forEach(feature -> feature.accept(this));
         currentScope = currentScope.getParent();
         return null;
@@ -76,11 +75,17 @@ public class ResolutionPassVisitor implements ASTVisitor<TypeSymbol> {
         currentScope = currentScope.getParent();
 
         List<TypeSymbol> inheritanceChain = ((TypeSymbol) currentScope).getInheritanceChain();
-        int parentFunctions = 0;
+        Set<String> definedFunctions = new HashSet<>();
         for (TypeSymbol typeSymbol : inheritanceChain)
-            if (typeSymbol != currentScope)
-                parentFunctions += typeSymbol.methodSymbols.size();
-        functionDefinition.functionSymbol.offset = 4 * (parentFunctions + methodCounter);
+            if (typeSymbol != currentScope) {
+                for (Map.Entry<String, FunctionSymbol> entry : typeSymbol.methodSymbols.entrySet()) {
+                    definedFunctions.add(entry.getValue().getName());
+                }
+            }
+        if (!definedFunctions.contains(functionDefinition.name.getText()))
+            functionDefinition.functionSymbol.offset = 4 * (definedFunctions.size() + methodCounter);
+        else
+            functionDefinition.functionSymbol.offset = ((FunctionSymbol) ((TypeSymbol) currentScope.getParent()).lookupFunction(functionDefinition.name.getText())).offset;
 
         Symbol parentFunction = ((TypeSymbol) functionSymbol.getParent().getParent()).lookupFunction(name.getText());
         if (parentFunction instanceof FunctionSymbol parentFunctionSymbol) {
@@ -121,12 +126,15 @@ public class ResolutionPassVisitor implements ASTVisitor<TypeSymbol> {
         currentScope = functionSymbol;
         TypeSymbol functionReturn = functionDefinition.expression.accept(this);
         if (functionReturn != TypeSymbol.SELF_TYPE && functionSymbol.returnType == TypeSymbol.SELF_TYPE) {
-            SymbolTable.error(functionDefinition.ctx, functionDefinition.expression.token,
-                    "Type " + functionReturn.getName() +
-                            " of the body of method " + functionDefinition.name.getText() +
-                            " is incompatible with declared return type " + functionSymbol.returnType.getName());
-            currentScope = currentScope.getParent();
-            return null;
+            TypeSymbol nearestTypeSymbol = getNearestTypeSymbol();
+            if (!functionReturn.inherits(nearestTypeSymbol)) {
+                SymbolTable.error(functionDefinition.ctx, functionDefinition.expression.token,
+                        "Type " + functionReturn.getName() +
+                                " of the body of method " + functionDefinition.name.getText() +
+                                " is incompatible with declared return type " + functionSymbol.returnType.getName());
+                currentScope = currentScope.getParent();
+                return null;
+            }
         }
         if (functionReturn == TypeSymbol.SELF_TYPE) functionReturn = getNearestTypeSymbol();
         TypeSymbol functionSymbolReturnType = (functionSymbol.returnType == TypeSymbol.SELF_TYPE ?
@@ -138,6 +146,8 @@ public class ResolutionPassVisitor implements ASTVisitor<TypeSymbol> {
                             " is incompatible with declared return type " + functionSymbol.returnType.getName());
         }
         currentScope = currentScope.getParent();
+        if (!definedFunctions.contains(functionDefinition.name.getText()))
+            methodCounter++;
 
         return null;
     }
@@ -149,7 +159,9 @@ public class ResolutionPassVisitor implements ASTVisitor<TypeSymbol> {
 
     @Override
     public TypeSymbol visit(LetExpression letExpression) {
-        currentScope = new LetScope(currentScope);
+        letExpression.scope = new LetScope(currentScope);
+        currentScope = letExpression.scope;
+        localCounter = 0;
         letExpression.locals.forEach(local -> local.accept(this));
         TypeSymbol letReturnType = letExpression.expression.accept(this);
         currentScope = currentScope.getParent();
@@ -182,6 +194,9 @@ public class ResolutionPassVisitor implements ASTVisitor<TypeSymbol> {
             }
         }
         currentScope.add(local.idSymbol);
+        local.idSymbol.isLocal = true;
+        localCounter++;
+        local.idSymbol.offset = 4 * localCounter;
 
         return null;
     }
@@ -414,6 +429,9 @@ public class ResolutionPassVisitor implements ASTVisitor<TypeSymbol> {
                                 " of static dispatch is undefined");
                 return null;
             }
+
+            if (dispatchType == TypeSymbol.SELF_TYPE)
+                dispatchType = getNearestTypeSymbol();
 
             if (!dispatchType.inherits(staticDispatchType)) {
                 SymbolTable.error(dispatchFunctionCallExpression.ctx, dispatchFunctionCallExpression.type,

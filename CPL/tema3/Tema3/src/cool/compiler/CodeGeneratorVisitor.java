@@ -15,6 +15,9 @@ public class CodeGeneratorVisitor implements ASTVisitor<ST> {
     int intCounter;
     int stringCounter;
     int dispatchCounter;
+    int ifCounter;
+    int isvoidCounter;
+    int notCounter;
     Scope currentScope;
     private Map<Integer, String> ints;
     private Map<String, String> strings;
@@ -72,6 +75,9 @@ public class CodeGeneratorVisitor implements ASTVisitor<ST> {
         intCounter = 0;
         stringCounter = 0;
         dispatchCounter = 0;
+        ifCounter = 0;
+        isvoidCounter = 0;
+        notCounter = 0;
         templates = new STGroupFile("cool/compiler/cgen.stg");
         ints = new HashMap<>();
         strings = new HashMap<>();
@@ -167,7 +173,8 @@ public class CodeGeneratorVisitor implements ASTVisitor<ST> {
         return templates.getInstanceOf("functionDefinition")
                 .add("class", functionDefinition.functionSymbol.parent.getName())
                 .add("functionName", functionDefinition.functionSymbol.getName())
-                .add("body", body);
+                .add("body", body)
+                .add("freeParamsOffset", functionDefinition.arguments.size() != 0 ? 4 * functionDefinition.arguments.size() : null);
     }
 
     @Override
@@ -177,13 +184,24 @@ public class CodeGeneratorVisitor implements ASTVisitor<ST> {
 
     @Override
     public ST visit(Id id) {
-        if (id.symbol.getName().equals("self")) {
+        Symbol idSymbol = currentScope.lookup(id.token.getText());
+        if (idSymbol.getName().equals("self")) {
             return templates.getInstanceOf("self");
         }
 
-        if (id.symbol.isField) {
+        if (((IdSymbol) idSymbol).isField) {
             return templates.getInstanceOf("field")
-                    .add("offset", id.symbol.offset);
+                    .add("offset", ((IdSymbol) idSymbol).offset);
+        }
+
+        if (((IdSymbol) idSymbol).isFormal) {
+            return templates.getInstanceOf("getFormalParameter")
+                    .add("offset", ((IdSymbol) idSymbol).offset);
+        }
+
+        if (((IdSymbol) idSymbol).isLocal) {
+            return templates.getInstanceOf("loadVar")
+                    .add("offset", ((IdSymbol) idSymbol).offset);
         }
         return null;
     }
@@ -210,7 +228,10 @@ public class CodeGeneratorVisitor implements ASTVisitor<ST> {
 
     @Override
     public ST visit(PlusMinusExpression plusMinusExpression) {
-        return null;
+        return templates.getInstanceOf("plusExpression")
+                .add("left", plusMinusExpression.left.accept(this))
+                .add("right", plusMinusExpression.right.accept(this))
+                .add("operation", plusMinusExpression.op.getText().equals("+") ? "add" : null);
     }
 
     @Override
@@ -220,7 +241,10 @@ public class CodeGeneratorVisitor implements ASTVisitor<ST> {
 
     @Override
     public ST visit(NotExpression notExpression) {
-        return null;
+        notCounter++;
+        return templates.getInstanceOf("not")
+                .add("expression", notExpression.expr.accept(this))
+                .add("counter", notCounter - 1);
     }
 
     @Override
@@ -237,17 +261,32 @@ public class CodeGeneratorVisitor implements ASTVisitor<ST> {
         if (((IdSymbol) idSymbol).isField) {
             assignmentSequence.add("e", templates.getInstanceOf("storeField").add("offset", ((IdSymbol) idSymbol).offset));
         }
+
+        if (((IdSymbol) idSymbol).isFormal) {
+            assignmentSequence.add("e", templates.getInstanceOf("storeFormalParameter").add("offset", ((IdSymbol) idSymbol).offset));
+        }
+
+        if (((IdSymbol) idSymbol).isLocal) {
+            assignmentSequence.add("e", templates.getInstanceOf("storeVar").add("offset", ((IdSymbol) idSymbol).offset));
+        }
+
         return assignmentSequence;
     }
 
     @Override
     public ST visit(IsVoidExpression isVoidExpression) {
-        return null;
+        isvoidCounter++;
+        return templates.getInstanceOf("isvoid")
+                .add("expression", isVoidExpression.expr.accept(this))
+                .add("counter", isvoidCounter - 1);
     }
 
     @Override
     public ST visit(NewExpression newExpression) {
-        return null;
+        if (newExpression.type.getText().equals("SELF_TYPE")) {
+            return templates.getInstanceOf("newSelfType");
+        }
+        return templates.getInstanceOf("new").add("type", newExpression.type.getText());
     }
 
     @Override
@@ -267,12 +306,18 @@ public class CodeGeneratorVisitor implements ASTVisitor<ST> {
                 .add("line", dispatchFunctionCallExpression.token.getLine())
                 .add("offset", ((FunctionSymbol) functionSymbol).offset)
                 .add("explicit", exprTemplate)
-                .add("parameters", dispatchFunctionCallExpression.callArgs.isEmpty() ? null : parameters);
+                .add("parameters", dispatchFunctionCallExpression.callArgs.isEmpty() ? null : parameters)
+                .add("static", dispatchFunctionCallExpression.type != null ? dispatchFunctionCallExpression.type.getText() : null);
     }
 
     @Override
     public ST visit(FunctionCallExpression functionCallExpression) {
-        Symbol functionSymbol = ((TypeSymbol) currentScope.getParent()).lookupFunction(functionCallExpression.name.getText());
+        Scope startScope = currentScope;
+        while (!(startScope instanceof TypeSymbol typeScope)) {
+            startScope = startScope.getParent();
+        }
+
+        Symbol functionSymbol = typeScope.lookupFunction(functionCallExpression.name.getText());
         dispatchCounter++;
         int currentDispatch = dispatchCounter;
         ST parameters = templates.getInstanceOf("sequence");
@@ -290,7 +335,12 @@ public class CodeGeneratorVisitor implements ASTVisitor<ST> {
 
     @Override
     public ST visit(IfExpression ifExpression) {
-        return null;
+        ifCounter++;
+        return templates.getInstanceOf("ifExpression")
+                .add("ifCounter", ifCounter - 1)
+                .add("condition", ifExpression.condition.accept(this))
+                .add("thenBranch", ifExpression.ifBranch.accept(this))
+                .add("elseBranch", ifExpression.elseBranch.accept(this));
     }
 
     @Override
@@ -300,12 +350,36 @@ public class CodeGeneratorVisitor implements ASTVisitor<ST> {
 
     @Override
     public ST visit(Local local) {
-        return null;
+        ST localSequence = templates.getInstanceOf("sequence");
+        if (local.expression == null) {
+            TypeSymbol localType = local.idSymbol.getType();
+            localSequence.add("e", templates.getInstanceOf("literal").add("val", localType.getDefaultValueForType(localType)))
+                    .add("e", templates.getInstanceOf("storeVar").add("offset", local.idSymbol.offset));
+        } else {
+            ST initLocalExpression = local.expression.accept(this);
+            localSequence.add("e", initLocalExpression)
+                    .add("e", templates.getInstanceOf("storeVar").add("offset", local.idSymbol.offset));
+        }
+        return localSequence;
     }
 
     @Override
     public ST visit(LetExpression letExpression) {
-        return null;
+        currentScope = letExpression.scope;
+        ST letSequence = templates.getInstanceOf("sequence");
+        ST localSequence = templates.getInstanceOf("sequence");
+        int localsSize = letExpression.locals.size();
+        ST letTemplate = templates.getInstanceOf("letExpression").add("offset", localsSize * 4);
+        letExpression.locals.forEach(local -> {
+            localSequence.add("e", local.accept(this));
+        });
+        letTemplate.add("inits", localSequence);
+        ST expression = letExpression.expression.accept(this);
+        letSequence.add("e", letTemplate)
+                .add("e", expression)
+                .add("e", templates.getInstanceOf("freeStack").add("offset", localsSize * 4));
+        currentScope = currentScope.getParent();
+        return letSequence;
     }
 
     @Override

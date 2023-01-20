@@ -80,7 +80,7 @@ public class TypeSymbol extends Symbol implements Scope {
                 .add("methods", methodsString);
     }
 
-    private String getDefaultValueForType(TypeSymbol type) {
+    public String getDefaultValueForType(TypeSymbol type) {
         if (type == TypeSymbol.INT)
             return "int_const0";
         else if (type == TypeSymbol.STRING)

@@ -1,10 +1,11 @@
 package cool.structures;
 
 public class IdSymbol extends Symbol {
-    // Fiecare identificator posedă un tip.
     protected TypeSymbol type;
     public int offset;
     public boolean isField;
+    public boolean isFormal;
+    public boolean isLocal;
 
     public IdSymbol(String name) {
         super(name);

@@ -8,6 +8,7 @@ import cool.structures.TypeSymbol;
 import org.antlr.v4.runtime.Token;
 
 public class TypeDefinitionsVisitor implements ASTVisitor<Void> {
+    int formalOffset;
     @Override
     public Void visit(Program program) {
         Symbol mainClass = SymbolTable.globals.lookup("Main");
@@ -107,6 +108,9 @@ public class TypeDefinitionsVisitor implements ASTVisitor<Void> {
         }
 
         formal.formalSymbol.setType((TypeSymbol) formalType);
+        formal.formalSymbol.isFormal = true;
+        formal.formalSymbol.offset = formalOffset;
+        formalOffset += 4;
         return null;
     }
 
@@ -128,6 +132,7 @@ public class TypeDefinitionsVisitor implements ASTVisitor<Void> {
             return null;
         }
         functionSymbol.returnType = returnType;
+        formalOffset = 12;
         functionDefinition.arguments.forEach(formal -> formal.accept(this));
 
         return null;

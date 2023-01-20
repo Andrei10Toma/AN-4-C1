@@ -1,16 +1,16 @@
 Loaded: trap.handler.nogc
 The following symbols are undefined:
-heap_start
-_bool_tag
-Int_protObj
-_int_tag
-_string_tag
-Main.main
-String_protObj
-class_nameTab
-Int_init
-String_init
-Main_protObj
 main
-Main_init
 
+3 OK
+a OK
+a1 OK
+a2 OK
+b OK
+b1 OK
+b2 OK
+x OK
+self OK
+comp OK
+copy OK
+COOL program successfully executed

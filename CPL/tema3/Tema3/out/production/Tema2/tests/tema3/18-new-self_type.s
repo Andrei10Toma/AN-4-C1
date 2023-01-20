@@ -669,6 +669,18 @@ Main.i:
     sw      $ra 4($sp)
     addiu   $fp $sp 4
     move    $s0 $a0
+    la      $t1 class_objTab
+    lw      $t2 0($s0)          # class tag
+    sll     $t2 $t2 3           # *8
+    addu    $t1 $t1 $t2         # class_objTab + 8 * tag
+    sw      $t1 0($sp)
+    addiu   $sp $sp -4
+    lw      $a0 0($t1)          # _protObj
+    jal     Object.copy
+    lw      $t1 4($sp)
+    addiu   $sp $sp 4
+    lw      $t1 4($t1)          # _init
+    jalr    $t1
     sw $a0 20($s0)
 
     lw $a0 20($s0)
@@ -725,14 +737,16 @@ Main.main:
     sw      $ra 4($sp)
     addiu   $fp $sp 4
     move    $s0 $a0
-    move $a0 $s0
+    la $a0 G_protObj
+    jal     Object.copy
+    jal     G_init
     bnez $a0 dispatch4
     la $a0 str_const15
     li $t1 40
     jal _dispatch_abort
     dispatch4:
     lw $t1 8($a0)
-    lw $t1 36($t1)
+    lw $t1 40($t1)
     jalr $t1
     lw      $fp 12($sp)
     lw      $s0 8($sp)

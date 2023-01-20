@@ -138,6 +138,7 @@ public class Compiler {
 
         if (SymbolTable.hasSemanticErrors()) {
             System.err.println("Compilation halted");
+            return;
         }
 
         var codeGenVisitor = new CodeGeneratorVisitor();

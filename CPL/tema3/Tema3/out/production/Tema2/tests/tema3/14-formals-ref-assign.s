@@ -637,7 +637,7 @@ Main.main:
     jal _dispatch_abort
     dispatch1:
     lw $t1 8($a0)
-    lw $t1 36($t1)
+    lw $t1 40($t1)
     jalr $t1
     sw      $a0 0($sp)
     addiu   $sp $sp -4
@@ -666,10 +666,10 @@ Main.charAt:
     la $a0 int_const3
     sw      $a0 0($sp)
     addiu   $sp $sp -4
-
+    lw $a0 16($fp)
     sw      $a0 0($sp)
     addiu   $sp $sp -4
-    move $a0 $s0
+    lw $a0 12($fp)
     bnez $a0 dispatch2
     la $a0 str_const14
     li $t1 35
@@ -678,10 +678,13 @@ Main.charAt:
     lw $t1 8($a0)
     lw $t1 20($t1)
     jalr $t1
+    sw $a0 12($fp)
+    lw $a0 12($fp)
     lw      $fp 12($sp)
     lw      $s0 8($sp)
     lw      $ra 4($sp)
     addiu   $sp $sp 12
+    addiu   $sp $sp 8
     jr      $ra
 
 Main_init:

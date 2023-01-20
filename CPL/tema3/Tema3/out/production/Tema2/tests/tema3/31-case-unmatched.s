@@ -628,6 +628,7 @@ Main.i:
     lw      $s0 8($sp)
     lw      $ra 4($sp)
     addiu   $sp $sp 12
+    addiu   $sp $sp 4
     jr      $ra
 
 Main.main:
