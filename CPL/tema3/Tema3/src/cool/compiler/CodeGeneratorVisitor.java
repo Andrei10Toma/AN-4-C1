@@ -228,7 +228,7 @@ public class CodeGeneratorVisitor implements ASTVisitor<ST> {
 
     @Override
     public ST visit(PlusMinusExpression plusMinusExpression) {
-        return templates.getInstanceOf("plusExpression")
+        return templates.getInstanceOf("arithmExpression")
                 .add("left", plusMinusExpression.left.accept(this))
                 .add("right", plusMinusExpression.right.accept(this))
                 .add("operation", plusMinusExpression.op.getText().equals("+") ? "add" : null);
